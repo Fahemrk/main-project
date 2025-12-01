@@ -1,0 +1,5 @@
+{
+  "name": "Copy of Smart Crop Guidance System",
+  "description": "An intelligent agricultural decision support system integrating Genetic Algorithms and Random Forest logic to predict optimal crops and provide detailed cultivation guides via Generative AI.",
+  "requestFramePermissions": []
+}
