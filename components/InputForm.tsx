@@ -83,7 +83,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
           ...prev,
           temperature: parseFloat(avgTemp.toFixed(1)),
           humidity: weatherData.current?.relative_humidity_2m || prev.humidity,
-          rainfall: parseFloat((totalRainfall / 90).toFixed(1))
+          rainfall: parseFloat(((totalRainfall * 25.4) / 90).toFixed(1))
         }));
       } else {
         alert("Weather data unavailable for these coordinates.");
