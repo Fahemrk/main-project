@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { SoilData } from '../types';
 import { Leaf, Droplets, Thermometer, Wind, FlaskConical, MapPin, CloudSun, Loader2, Crosshair } from 'lucide-react';

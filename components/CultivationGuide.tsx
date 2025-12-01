@@ -9,12 +9,12 @@ const CultivationGuide: React.FC<GuideProps> = ({ guide, crop }) => {
   
   // Helper to parse **bold** text into React elements
   const parseBold = (text: string) => {
-    // Split by **...** pattern
-    const parts = text.split(/(\*\*.*?\*\*)/g);
+    // Replace **text** with <strong>text</strong>
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
     return parts.map((part, i) => {
       if (part.startsWith('**') && part.endsWith('**')) {
-        // Remove asterisks and wrap in strong tag
-        return <strong key={i} className="text-slate-900 font-bold">{part.replace(/\*\*/g, '')}</strong>;
+        const boldText = part.slice(2, -2);
+        return <strong key={i} className="text-slate-900 font-bold">{boldText}</strong>;
       }
       return part;
     });
@@ -26,16 +26,18 @@ const CultivationGuide: React.FC<GuideProps> = ({ guide, crop }) => {
       const trimmedLine = line.trim();
 
       if (trimmedLine.startsWith('###')) {
-        return <h3 key={index} className="text-xl font-bold text-green-800 mt-6 mb-3">{line.replace(/#/g, '').trim()}</h3>;
+        const headingText = line.replace(/#/g, '').trim().replace(/\*\*/g, '');
+        return <h3 key={index} className="text-xl font-bold text-green-800 mt-6 mb-3">{headingText}</h3>;
       }
       
       // Handle "Key: Value" lines that might start with bolding
       if (trimmedLine.includes(':') && (trimmedLine.startsWith('**') || trimmedLine.startsWith('- **') || trimmedLine.startsWith('* **'))) {
         const cleanLine = trimmedLine.replace(/^[-*] /, ''); // Remove list bullet if present
         const parts = cleanLine.split(':');
+        const keyText = parts[0].replace(/\*\*/g, '').trim();
         return (
             <div key={index} className="mb-2">
-                <span className="font-bold text-slate-800">{parts[0].replace(/\*\*/g, '').trim()}:</span>
+                <span className="font-bold text-slate-800">{keyText}:</span>
                 <span className="text-slate-600 ml-2">{parseBold(parts.slice(1).join(':').trim())}</span>
             </div>
         )
