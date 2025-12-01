@@ -25,6 +25,10 @@ const CultivationGuide: React.FC<GuideProps> = ({ guide, crop }) => {
     return text.split('\n').map((line, index) => {
       const trimmedLine = line.trim();
 
+      if (trimmedLine === '---' || trimmedLine === '') {
+        return trimmedLine === '' ? <br key={index} /> : null;
+      }
+
       if (trimmedLine.startsWith('###')) {
         const headingText = line.replace(/#/g, '').trim().replace(/\*\*/g, '');
         return <h3 key={index} className="text-xl font-bold text-green-800 mt-6 mb-3">{headingText}</h3>;
@@ -47,10 +51,6 @@ const CultivationGuide: React.FC<GuideProps> = ({ guide, crop }) => {
       if (trimmedLine.startsWith('* ') || trimmedLine.startsWith('- ')) {
         const content = trimmedLine.replace(/^[-*] /, '');
         return <li key={index} className="ml-4 text-slate-700 mb-1 list-disc list-inside">{parseBold(content)}</li>;
-      }
-
-      if (trimmedLine === '') {
-        return <br key={index} />;
       }
 
       // Default paragraph handling
