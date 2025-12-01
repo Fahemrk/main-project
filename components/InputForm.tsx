@@ -240,8 +240,8 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
             <div className="h-1 w-20 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full mt-2"></div>
         </div>
         <InputField label="Temperature" name="temperature" icon={Thermometer} min={8} max={45} step={0.1} unit="°C" />
-        <InputField label="Humidity" name="humidity" icon={Droplets} min={10} max={100} unit="%" />
-        <InputField label="Rainfall" name="rainfall" icon={Droplets} min={0} max={1500} unit="mm" />
+        <InputField label="Humidity" name="humidity" icon={Droplets} min={10} max={100} step={0.1} unit="%" />
+        <InputField label="Rainfall" name="rainfall" icon={Droplets} min={0} max={1500} step={0.1} unit="mm" />
       </div>
 
       <div className="flex justify-center sticky bottom-8 z-20">
