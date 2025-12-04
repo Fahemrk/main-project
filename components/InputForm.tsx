@@ -36,6 +36,9 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
     
     try {
       if (type === 'number' || type === 'range') {
+        if (value === '' || value === null) {
+          return;
+        }
         const num = sanitizeNumber(value);
         setFormData(prev => ({
           ...prev,
@@ -103,13 +106,13 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
         return;
       }
 
-      const rainArray = weatherData.daily.precipitation_sum as number[];
-      const totalRainfall = rainArray.reduce((acc, curr) => acc + (sanitizeNumber(curr) || 0), 0);
+      const rainArray = (weatherData.daily.precipitation_sum as (number | null)[]).filter(v => v !== null && v !== undefined) as number[];
+      const totalRainfall = rainArray.reduce((acc, curr) => acc + sanitizeNumber(curr), 0);
 
-      const tempArray = weatherData.daily.temperature_2m_mean as number[];
-      const avgTemp = tempArray.reduce((acc, curr) => acc + (sanitizeNumber(curr) || 0), 0) / tempArray.length;
+      const tempArray = (weatherData.daily.temperature_2m_mean as (number | null)[]).filter(v => v !== null && v !== undefined) as number[];
+      const avgTemp = tempArray.length > 0 ? tempArray.reduce((acc, curr) => acc + sanitizeNumber(curr), 0) / tempArray.length : formData.temperature;
 
-      const humidity = sanitizeNumber(weatherData.current?.relative_humidity_2m || prev.humidity);
+      const humidity = sanitizeNumber(weatherData.current?.relative_humidity_2m ?? formData.humidity);
       const temperature = sanitizeNumber(avgTemp);
       const rainfall = sanitizeNumber((totalRainfall * 25.4) / 90);
 
