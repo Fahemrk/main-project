@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { SoilData } from '../types';
+import { sanitizeNumber } from '../utils/sanitize';
 import { Leaf, Droplets, Thermometer, Wind, FlaskConical, MapPin, CloudSun, Loader2, Crosshair } from 'lucide-react';
 
 interface InputFormProps {
@@ -8,7 +9,13 @@ interface InputFormProps {
   isLoading: boolean;
 }
 
+interface ValidationError {
+  field: string;
+  message: string;
+}
+
 const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [formData, setFormData] = useState<SoilData>({
     latitude: 21.14,
     longitude: 79.08,
@@ -26,10 +33,23 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'number' || type === 'range' ? parseFloat(value) : value
-    }));
+    
+    try {
+      if (type === 'number' || type === 'range') {
+        const num = sanitizeNumber(value);
+        setFormData(prev => ({
+          ...prev,
+          [name]: num
+        }));
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          [name]: value
+        }));
+      }
+    } catch (error) {
+      console.warn(`Invalid value for ${name}:`, value);
+    }
   };
 
   const handleGeolocation = () => {
@@ -63,52 +83,127 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
 
     setIsFetchingWeather(true);
     try {
-      // Fetch past 92 days (approx 1 season) to get averages instead of just "today's" weather
-      // Rainfall needs to be CUMULATIVE over a season, not just today's rain (which is often 0)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       const weatherRes = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${formData.latitude}&longitude=${formData.longitude}&current=relative_humidity_2m&daily=temperature_2m_mean,precipitation_sum&past_days=92&forecast_days=1&timezone=auto`
+        `https://api.open-meteo.com/v1/forecast?latitude=${formData.latitude}&longitude=${formData.longitude}&current=relative_humidity_2m&daily=temperature_2m_mean,precipitation_sum&past_days=92&forecast_days=1&timezone=auto`,
+        { signal: controller.signal }
       );
-      const weatherData = await weatherRes.json();
+      clearTimeout(timeoutId);
 
-      if (weatherData.daily && weatherData.daily.precipitation_sum) {
-        // Calculate Seasonal Rainfall (Sum of past ~3 months)
-        const rainArray = weatherData.daily.precipitation_sum as number[];
-        const totalRainfall = rainArray.reduce((acc, curr) => acc + (curr || 0), 0);
-
-        // Calculate Average Temperature (Mean of past ~3 months)
-        const tempArray = weatherData.daily.temperature_2m_mean as number[];
-        const avgTemp = tempArray.reduce((acc, curr) => acc + (curr || 0), 0) / tempArray.length;
-
-        setFormData(prev => ({
-          ...prev,
-          temperature: parseFloat(avgTemp.toFixed(1)),
-          humidity: weatherData.current?.relative_humidity_2m || prev.humidity,
-          rainfall: parseFloat(((totalRainfall * 25.4) / 90).toFixed(1))
-        }));
-      } else {
-        alert("Weather data unavailable for these coordinates.");
+      if (!weatherRes.ok) {
+        throw new Error(`Weather API error: ${weatherRes.statusText}`);
       }
 
+      const weatherData = await weatherRes.json();
+
+      if (!weatherData.daily || !weatherData.daily.precipitation_sum) {
+        alert("Weather data unavailable for these coordinates.");
+        return;
+      }
+
+      const rainArray = weatherData.daily.precipitation_sum as number[];
+      const totalRainfall = rainArray.reduce((acc, curr) => acc + (sanitizeNumber(curr) || 0), 0);
+
+      const tempArray = weatherData.daily.temperature_2m_mean as number[];
+      const avgTemp = tempArray.reduce((acc, curr) => acc + (sanitizeNumber(curr) || 0), 0) / tempArray.length;
+
+      const humidity = sanitizeNumber(weatherData.current?.relative_humidity_2m || prev.humidity);
+      const temperature = sanitizeNumber(avgTemp);
+      const rainfall = sanitizeNumber((totalRainfall * 25.4) / 90);
+
+      setFormData(prev => ({
+        ...prev,
+        temperature: parseFloat(temperature.toFixed(1)),
+        humidity: humidity,
+        rainfall: parseFloat(rainfall.toFixed(1))
+      }));
     } catch (error) {
-      console.error("Weather Fetch Error:", error);
-      alert("Could not fetch weather data. Please enter manually.");
+      if (error instanceof Error && error.name === 'AbortError') {
+        alert("Weather request timed out. Please try again or enter manually.");
+      } else {
+        console.error("Weather Fetch Error:", error);
+        alert("Could not fetch weather data. Please enter manually.");
+      }
     } finally {
       setIsFetchingWeather(false);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
+  const validateForm = (): boolean => {
+    const errors: ValidationError[] = [];
+
+    if (!formData.latitude || !formData.longitude) {
+      errors.push({ field: 'location', message: 'Latitude and longitude are required' });
+    }
+
+    if (formData.latitude! < -90 || formData.latitude! > 90) {
+      errors.push({ field: 'latitude', message: 'Latitude must be between -90 and 90' });
+    }
+
+    if (formData.longitude! < -180 || formData.longitude! > 180) {
+      errors.push({ field: 'longitude', message: 'Longitude must be between -180 and 180' });
+    }
+
+    if (formData.N < 0 || formData.N > 140) {
+      errors.push({ field: 'N', message: 'Nitrogen must be between 0 and 140 kg/ha' });
+    }
+
+    if (formData.P < 5 || formData.P > 145) {
+      errors.push({ field: 'P', message: 'Phosphorus must be between 5 and 145 kg/ha' });
+    }
+
+    if (formData.K < 5 || formData.K > 205) {
+      errors.push({ field: 'K', message: 'Potassium must be between 5 and 205 kg/ha' });
+    }
+
+    if (formData.ph < 3.5 || formData.ph > 10) {
+      errors.push({ field: 'ph', message: 'pH must be between 3.5 and 10' });
+    }
+
+    if (formData.temperature < 8 || formData.temperature > 45) {
+      errors.push({ field: 'temperature', message: 'Temperature must be between 8 and 45°C' });
+    }
+
+    if (formData.humidity < 10 || formData.humidity > 100) {
+      errors.push({ field: 'humidity', message: 'Humidity must be between 10 and 100%' });
+    }
+
+    if (formData.rainfall < 0 || formData.rainfall > 1500) {
+      errors.push({ field: 'rainfall', message: 'Rainfall must be between 0 and 1500 mm' });
+    }
+
+    setValidationErrors(errors);
+    return errors.length === 0;
   };
 
-  const InputField = ({ label, name, icon: Icon, min, max, step = 1, unit }: any) => (
-    <div className="group bg-gradient-to-br from-slate-50 to-slate-100 p-5 rounded-2xl shadow-md border border-slate-200 hover:shadow-lg hover:border-green-300 transition-all duration-300">
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validateForm()) {
+      onSubmit(formData);
+    }
+  };
+
+  const InputField = ({ label, name, icon: Icon, min, max, step = 1, unit }: any) => {
+    const error = validationErrors.find(e => e.field === name);
+    const hasError = !!error;
+
+    return (
+    <div className={`group bg-gradient-to-br from-slate-50 to-slate-100 p-5 rounded-2xl shadow-md border-2 transition-all duration-300 ${
+      hasError ? 'border-red-400 bg-red-50' : 'border-slate-200 hover:shadow-lg hover:border-green-300'
+    }`}>
       <div className="flex items-center gap-2 mb-3">
-        <div className="p-2 bg-gradient-to-br from-green-400 to-green-600 rounded-lg group-hover:scale-110 transition-transform">
+        <div className={`p-2 rounded-lg group-hover:scale-110 transition-transform ${
+          hasError 
+            ? 'bg-red-400' 
+            : 'bg-gradient-to-br from-green-400 to-green-600'
+        }`}>
           <Icon size={16} className="text-white" />
         </div>
-        <label htmlFor={name} className="text-slate-700 font-semibold text-sm">{label}</label>
+        <label htmlFor={name} className={`font-semibold text-sm ${
+          hasError ? 'text-red-700' : 'text-slate-700'
+        }`}>{label}</label>
       </div>
       <div className="flex items-center gap-3 mb-3">
         <input
@@ -141,11 +236,29 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
           <span>{max}</span>
         </div>
       </div>
+      {hasError && (
+        <p className="text-xs text-red-600 font-semibold mt-2 flex items-center gap-1">
+          <span>⚠</span> {error?.message}
+        </p>
+      )}
     </div>
-  );
+    );
+  };
 
   return (
     <form onSubmit={handleSubmit} className="max-w-5xl mx-auto px-4 py-8">
+      {validationErrors.length > 0 && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg mb-8">
+          <h3 className="font-bold text-red-800 mb-2">Please fix the following errors:</h3>
+          <ul className="text-sm text-red-700 space-y-1">
+            {validationErrors.map((err, idx) => (
+              <li key={idx} className="flex items-center gap-2">
+                <span>•</span> {err.message}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       
       {/* Location Section */}
       <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-3xl shadow-lg border-2 border-blue-200 mb-10">

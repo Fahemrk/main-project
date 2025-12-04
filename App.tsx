@@ -10,7 +10,14 @@ import CultivationGuide from './components/CultivationGuide';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import LandingPage from './components/LandingPage';
+import ErrorBoundary from './components/ErrorBoundary';
+import ErrorAlert from './components/ErrorAlert';
 import { Sprout, BarChart3, BookOpen, ArrowLeft, CheckCircle2 } from 'lucide-react';
+
+interface AppError {
+  title: string;
+  message: string;
+}
 
 const App: React.FC = () => {
   const [state, setState] = useState<AppState>(AppState.LANDING);
@@ -18,6 +25,7 @@ const App: React.FC = () => {
   const [prediction, setPrediction] = useState<CropPrediction | null>(null);
   const [guide, setGuide] = useState<string>('');
   const [loadingStep, setLoadingStep] = useState<string>('');
+  const [error, setError] = useState<AppError | null>(null);
 
   const handleLogin = () => {
     setState(AppState.INPUT);
@@ -39,6 +47,7 @@ const App: React.FC = () => {
   const handleFormSubmit = async (data: SoilData) => {
     setInputData(data);
     setState(AppState.PROCESSING);
+    setError(null);
     
     try {
       // Step 1: Prediction
@@ -55,10 +64,22 @@ const App: React.FC = () => {
       setGuide(guideText);
 
       setState(AppState.RESULT);
-    } catch (error) {
-      console.error(error);
-      alert("An error occurred during analysis.");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      
+      console.error('Prediction error:', err);
+      
+      setError({
+        title: 'Analysis Failed',
+        message: errorMessage || 'Could not complete crop analysis. Please check your inputs and try again.',
+      });
       setState(AppState.INPUT);
+    }
+  };
+
+  const retryFormSubmit = () => {
+    if (inputData) {
+      handleFormSubmit(inputData);
     }
   };
 
@@ -88,64 +109,85 @@ const App: React.FC = () => {
 
   // Render Landing Page
   if (state === AppState.LANDING) {
-    return <LandingPage onLogin={handleNavigateToLogin} onRegister={handleNavigateToRegister} />;
+    return (
+      <ErrorBoundary>
+        <LandingPage onLogin={handleNavigateToLogin} onRegister={handleNavigateToRegister} />
+      </ErrorBoundary>
+    );
   }
 
   // Render Login Page independently
   if (state === AppState.LOGIN) {
-    return <LoginPage onLogin={handleLogin} onRegisterClick={handleNavigateToRegister} />;
+    return (
+      <ErrorBoundary>
+        <LoginPage onLogin={handleLogin} onRegisterClick={handleNavigateToRegister} />
+      </ErrorBoundary>
+    );
   }
 
   // Render Register Page independently
   if (state === AppState.REGISTER) {
-    return <RegisterPage onRegister={handleRegisterSuccess} onLoginClick={handleNavigateToLogin} />;
+    return (
+      <ErrorBoundary>
+        <RegisterPage onRegister={handleRegisterSuccess} onLoginClick={handleNavigateToLogin} />
+      </ErrorBoundary>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={handleLogoClick}>
-            <div className="bg-green-600 p-2 rounded-lg">
-                <Sprout className="text-white" size={24} />
+    <ErrorBoundary>
+      <div className="min-h-screen bg-slate-50 flex flex-col">
+        {/* Header */}
+        <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-2 cursor-pointer" onClick={handleLogoClick}>
+              <div className="bg-green-600 p-2 rounded-lg">
+                  <Sprout className="text-white" size={24} />
+              </div>
+              <h1 className="text-xl font-bold text-slate-800 tracking-tight">
+                Smart Crop <span className="text-green-600">Guidance</span>
+              </h1>
             </div>
-            <h1 className="text-xl font-bold text-slate-800 tracking-tight">
-              Smart Crop <span className="text-green-600">Guidance</span>
-            </h1>
-          </div>
-          <div className="flex items-center gap-4">
-             <div className="text-sm text-slate-500 hidden sm:block">
-              Powered by GA-RF Model & GenAI
+            <div className="flex items-center gap-4">
+               <div className="text-sm text-slate-500 hidden sm:block">
+                Powered by GA-RF Model & GenAI
+              </div>
+              <button 
+                onClick={logout} 
+                className="text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-full transition-colors"
+              >
+                Sign Out
+              </button>
             </div>
-            <button 
-              onClick={logout} 
-              className="text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-full transition-colors"
-            >
-              Sign Out
-            </button>
+           
           </div>
-         
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content */}
-      <main className="flex-grow container mx-auto px-4 py-8">
-        
-        {state === AppState.INPUT && (
-          <div className="animate-fade-in-up">
-            <div className="text-center max-w-2xl mx-auto mb-10">
-                <h2 className="text-3xl font-extrabold text-slate-900 sm:text-4xl mb-4">
-                    Maximize Your Yield
-                </h2>
-                <p className="text-lg text-slate-600">
-                    Enter your soil and weather parameters below. Our hybrid Machine Learning model 
-                    will predict the most profitable crop for your land.
-                </p>
+        {/* Main Content */}
+        <main className="flex-grow container mx-auto px-4 py-8">
+          {error && (
+            <ErrorAlert
+              title={error.title}
+              message={error.message}
+              onDismiss={() => setError(null)}
+              onRetry={state === AppState.INPUT ? retryFormSubmit : undefined}
+            />
+          )}
+          
+          {state === AppState.INPUT && (
+            <div className="animate-fade-in-up">
+              <div className="text-center max-w-2xl mx-auto mb-10">
+                  <h2 className="text-3xl font-extrabold text-slate-900 sm:text-4xl mb-4">
+                      Maximize Your Yield
+                  </h2>
+                  <p className="text-lg text-slate-600">
+                      Enter your soil and weather parameters below. Our hybrid Machine Learning model 
+                      will predict the most profitable crop for your land.
+                  </p>
+              </div>
+              <InputForm onSubmit={handleFormSubmit} isLoading={false} />
             </div>
-            <InputForm onSubmit={handleFormSubmit} isLoading={false} />
-          </div>
-        )}
+          )}
 
         {state === AppState.PROCESSING && (
            <div className="flex flex-col items-center justify-center min-h-[50vh] animate-fade-in">
@@ -212,13 +254,14 @@ const App: React.FC = () => {
 
       </main>
 
-      <footer className="bg-white border-t border-slate-200 mt-auto py-8">
-        <div className="container mx-auto px-4 text-center text-slate-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} Smart Crop Guidance System.</p>
-          <p className="mt-2">Based on research: "An Approach for Crop Prediction in Agriculture: Integrating Genetic Algorithms and Machine Learning"</p>
-        </div>
-      </footer>
-    </div>
+        <footer className="bg-white border-t border-slate-200 mt-auto py-8">
+          <div className="container mx-auto px-4 text-center text-slate-500 text-sm">
+            <p>&copy; {new Date().getFullYear()} Smart Crop Guidance System.</p>
+            <p className="mt-2">Based on research: "An Approach for Crop Prediction in Agriculture: Integrating Genetic Algorithms and Machine Learning"</p>
+          </div>
+        </footer>
+      </div>
+    </ErrorBoundary>
   );
 };
 
