@@ -47,7 +47,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegisterClick }) => {
                 <Sprout className="text-white" size={32} />
              </div>
              <h1 className="text-2xl font-bold text-white mb-1">Welcome Back</h1>
-             <p className="text-green-100 text-sm">Smart Crop Guidance System</p>
+             <p className="text-green-100 text-sm">PlantKaro</p>
            </div>
         </div>
         

@@ -152,7 +152,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onRegister }) => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
               <div className="flex items-center gap-2">
                   <Sprout className="text-green-600" size={20} />
-                  <span className="font-bold text-slate-700">Smart Crop Guidance</span>
+                  <span className="font-bold text-slate-700">PlantKaro</span>
               </div>
               <p className="text-slate-500 text-sm">
                   © {new Date().getFullYear()} All rights reserved.

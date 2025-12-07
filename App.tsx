@@ -145,7 +145,7 @@ const App: React.FC = () => {
                   <Sprout className="text-white" size={24} />
               </div>
               <h1 className="text-xl font-bold text-slate-800 tracking-tight">
-                Smart Crop <span className="text-green-600">Guidance</span>
+                Plant<span className="text-green-600">Karo</span>
               </h1>
             </div>
             <div className="flex items-center gap-4">
@@ -256,8 +256,8 @@ const App: React.FC = () => {
 
         <footer className="bg-white border-t border-slate-200 mt-auto py-8">
           <div className="container mx-auto px-4 text-center text-slate-500 text-sm">
-            <p>&copy; {new Date().getFullYear()} Smart Crop Guidance System.</p>
-            <p className="mt-2">Based on research: "An Approach for Crop Prediction in Agriculture: Integrating Genetic Algorithms and Machine Learning"</p>
+            <p>&copy; {new Date().getFullYear()} PlantKaro</p>
+            {/* <p className="mt-2">Based on research: "An Approach for Crop Prediction in Agriculture: Integrating Genetic Algorithms and Machine Learning"</p> */}
           </div>
         </footer>
       </div>
