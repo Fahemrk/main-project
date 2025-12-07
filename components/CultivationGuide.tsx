@@ -53,7 +53,7 @@ const CultivationGuide: React.FC<GuideProps> = ({ guide, crop }) => {
               blockquote: ({ node, ...props }) => (
                 <blockquote className="border-l-4 border-green-500 pl-4 py-2 my-3 bg-green-50 italic text-slate-700" {...props} />
               ),
-              code: ({ node, inline, ...props }) =>
+              code: ({ node, inline, ...props }: any) =>
                 inline ? (
                   <code className="bg-slate-100 px-2 py-1 rounded text-sm text-red-600 font-mono" {...props} />
                 ) : (

@@ -19,6 +19,7 @@ const ErrorAlert: React.FC<ErrorAlertProps> = ({ title, message, onDismiss, onRe
           <div className="flex gap-2">
             {onRetry && (
               <button
+                type="button"
                 onClick={onRetry}
                 className="text-sm font-semibold text-red-700 hover:text-red-900 bg-red-100 hover:bg-red-200 px-3 py-1 rounded transition-colors"
               >
@@ -26,6 +27,7 @@ const ErrorAlert: React.FC<ErrorAlertProps> = ({ title, message, onDismiss, onRe
               </button>
             )}
             <button
+              type="button"
               onClick={onDismiss}
               className="text-sm font-semibold text-red-700 hover:text-red-900 bg-red-100 hover:bg-red-200 px-3 py-1 rounded transition-colors"
             >
@@ -34,7 +36,9 @@ const ErrorAlert: React.FC<ErrorAlertProps> = ({ title, message, onDismiss, onRe
           </div>
         </div>
         <button
+          type="button"
           onClick={onDismiss}
+          aria-label="Close error alert"
           className="text-red-600 hover:text-red-900 flex-shrink-0"
         >
           <X size={20} />
