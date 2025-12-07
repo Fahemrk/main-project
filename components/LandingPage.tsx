@@ -19,7 +19,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onRegister }) => {
                 <Sprout className="text-white" size={24} />
             </div>
             <span className="text-xl font-bold tracking-tight text-slate-900">
-              Smart Crop <span className="text-green-600">Guidance</span>
+              Plant<span className="text-green-600">Karo</span>
             </span>
           </div>
           <div className="flex items-center gap-4">
