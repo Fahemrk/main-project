@@ -49,16 +49,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onRegister }) => {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 border border-green-100 text-green-700 font-medium text-sm mb-6">
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm mb-6 ${isDark ? 'bg-slate-800 border border-slate-700 text-green-400' : 'bg-green-50 border border-green-100 text-green-700'}`}>
                 <Zap size={16} fill="currentColor" /> Powered by Genetic Algorithms & Advanced AI
             </div>
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-8 leading-tight">
+            <h1 className={`text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-tight ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
               Farming Intelligence <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500">
                 Reimagined for You.
               </span>
             </h1>
-            <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className={`text-xl mb-10 max-w-2xl mx-auto leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
               Stop guessing. Start growing. Our hybrid ML model predicts the perfect crop for your soil, while AI generates your step-by-step cultivation roadmap.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

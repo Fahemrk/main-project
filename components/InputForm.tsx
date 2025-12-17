@@ -292,11 +292,11 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
         <div>
           <label className={`block text-sm font-semibold mb-3 uppercase tracking-wide ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Location Coordinates</label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-             <div className="relative">
-                <label htmlFor="latitude" className={`absolute -top-3 left-4 px-2 text-xs font-bold uppercase ${
+             <div>
+                <label htmlFor="latitude" className={`block text-xs font-bold uppercase mb-2 ${
                   isDark 
-                    ? 'bg-slate-800 text-blue-400' 
-                    : 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700'
+                    ? 'text-blue-400' 
+                    : 'text-blue-700'
                 }`}>Latitude</label>
                 <input
                     type="number"
@@ -313,11 +313,11 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
                     }`}
                 />
              </div>
-             <div className="relative">
-                <label htmlFor="longitude" className={`absolute -top-3 left-4 px-2 text-xs font-bold uppercase ${
+             <div>
+                <label htmlFor="longitude" className={`block text-xs font-bold uppercase mb-2 ${
                   isDark 
-                    ? 'bg-slate-800 text-blue-400' 
-                    : 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700'
+                    ? 'text-blue-400' 
+                    : 'text-blue-700'
                 }`}>Longitude</label>
                 <input
                     type="number"

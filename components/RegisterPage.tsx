@@ -1,4 +1,3 @@
-pip install shap lime
 import React, { useState } from 'react';
 import { Sprout, Lock, Mail, User, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';

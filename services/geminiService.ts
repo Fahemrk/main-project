@@ -14,10 +14,10 @@ Structure your response in clear sections using Markdown.
 `;
 
 export const getCultivationGuide = async (crop: string, inputData: SoilData): Promise<string> => {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY is not configured. Please set it in your environment variables.');
+    throw new Error('VITE_GEMINI_API_KEY is not configured. Please set it in your .env.local file.');
   }
 
   try {
