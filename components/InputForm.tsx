@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { SoilData } from '../types';
 import { sanitizeNumber } from '../utils/sanitize';
+import { useTheme } from '../hooks/useTheme';
 import { Leaf, Droplets, Thermometer, Wind, FlaskConical, MapPin, CloudSun, Loader2, Crosshair } from 'lucide-react';
 
 interface InputFormProps {
@@ -15,6 +16,7 @@ interface ValidationError {
 }
 
 const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
+  const { isDark } = useTheme();
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [formData, setFormData] = useState<SoilData>({
     latitude: 21.14,
@@ -193,8 +195,10 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
     const hasError = !!error;
 
     return (
-    <div className={`group bg-gradient-to-br from-slate-50 to-slate-100 p-5 rounded-2xl shadow-md border-2 transition-all duration-300 ${
-      hasError ? 'border-red-400 bg-red-50' : 'border-slate-200 hover:shadow-lg hover:border-green-300'
+    <div className={`group p-5 rounded-2xl shadow-md border-2 transition-all duration-300 ${
+      hasError 
+        ? `border-red-400 ${isDark ? 'bg-red-950' : 'bg-red-50'}` 
+        : `${isDark ? 'bg-slate-800 border-slate-700 hover:border-green-500' : 'bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 hover:shadow-lg hover:border-green-300'}`
     }`}>
       <div className="flex items-center gap-2 mb-3">
         <div className={`p-2 rounded-lg group-hover:scale-110 transition-transform ${
@@ -205,7 +209,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
           <Icon size={16} className="text-white" />
         </div>
         <label htmlFor={name} className={`font-semibold text-sm ${
-          hasError ? 'text-red-700' : 'text-slate-700'
+          hasError ? 'text-red-700' : isDark ? 'text-slate-200' : 'text-slate-700'
         }`}>{label}</label>
       </div>
       <div className="flex items-center gap-3 mb-3">
@@ -215,13 +219,21 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
           name={name}
           value={formData[name as keyof SoilData]}
           onChange={handleChange}
-          className="flex-1 bg-white border-2 border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400 focus:border-transparent focus:outline-none text-slate-800 font-bold text-lg hover:border-green-300 transition-colors"
+          className={`flex-1 border-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400 focus:border-transparent focus:outline-none font-bold text-lg transition-colors ${
+            isDark 
+              ? 'bg-slate-700 border-slate-600 text-slate-100 hover:border-green-400' 
+              : 'bg-white border-slate-200 text-slate-800 hover:border-green-300'
+          }`}
           min={min}
           max={max}
           step={step}
           required
         />
-        <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-md">{unit}</span>
+        <span className={`text-xs font-semibold px-2 py-1 rounded-md ${
+          isDark 
+            ? 'text-green-400 bg-green-950' 
+            : 'text-green-600 bg-green-50'
+        }`}>{unit}</span>
       </div>
       <div className="space-y-1">
         <input 
@@ -232,9 +244,11 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
           name={name}
           value={formData[name as keyof SoilData] || min} 
           onChange={handleChange}
-          className="w-full h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-green-500 hover:accent-green-600 transition-colors"
+          className={`w-full h-2 rounded-lg appearance-none cursor-pointer accent-green-500 hover:accent-green-600 transition-colors ${
+            isDark ? 'bg-slate-700' : 'bg-slate-300'
+          }`}
         />
-        <div className="flex justify-between text-xs text-slate-500 px-1">
+        <div className={`flex justify-between text-xs px-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
           <span>{min}</span>
           <span>{max}</span>
         </div>
@@ -251,9 +265,9 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
   return (
     <form onSubmit={handleSubmit} className="max-w-5xl mx-auto px-4 py-8">
       {validationErrors.length > 0 && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg mb-8">
-          <h3 className="font-bold text-red-800 mb-2">Please fix the following errors:</h3>
-          <ul className="text-sm text-red-700 space-y-1">
+        <div className={`border-l-4 border-red-500 p-4 rounded-lg mb-8 ${isDark ? 'bg-red-950' : 'bg-red-50'}`}>
+          <h3 className={`font-bold mb-2 ${isDark ? 'text-red-300' : 'text-red-800'}`}>Please fix the following errors:</h3>
+          <ul className={`text-sm space-y-1 ${isDark ? 'text-red-300' : 'text-red-700'}`}>
             {validationErrors.map((err, idx) => (
               <li key={idx} className="flex items-center gap-2">
                 <span>•</span> {err.message}
@@ -264,18 +278,26 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
       )}
       
       {/* Location Section */}
-      <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-3xl shadow-lg border-2 border-blue-200 mb-10">
+      <div className={`p-8 rounded-3xl shadow-lg border-2 mb-10 ${
+        isDark 
+          ? 'bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700' 
+          : 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200'
+      }`}>
         <div className="flex items-center gap-3 mb-6">
           <div className="p-3 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl">
             <MapPin className="text-white" size={24} />
           </div>
-          <h2 className="text-2xl font-bold text-slate-800">Geographic Details</h2>
+          <h2 className={`text-2xl font-bold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>Geographic Details</h2>
         </div>
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wide">Location Coordinates</label>
+          <label className={`block text-sm font-semibold mb-3 uppercase tracking-wide ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Location Coordinates</label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
              <div className="relative">
-                <label htmlFor="latitude" className="absolute -top-3 left-4 bg-gradient-to-r from-blue-50 to-blue-100 px-2 text-xs font-bold text-blue-700 uppercase">Latitude</label>
+                <label htmlFor="latitude" className={`absolute -top-3 left-4 px-2 text-xs font-bold uppercase ${
+                  isDark 
+                    ? 'bg-slate-800 text-blue-400' 
+                    : 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700'
+                }`}>Latitude</label>
                 <input
                     type="number"
                     id="latitude"
@@ -284,11 +306,19 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
                     onChange={handleChange}
                     step="0.0001"
                     placeholder="21.1458"
-                    className="w-full bg-white border-2 border-blue-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none text-slate-800 font-semibold hover:border-blue-400 transition-colors"
+                    className={`w-full border-2 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none font-semibold transition-colors ${
+                      isDark 
+                        ? 'bg-slate-700 border-slate-600 text-slate-100 hover:border-blue-400' 
+                        : 'bg-white border-blue-300 text-slate-800 hover:border-blue-400'
+                    }`}
                 />
              </div>
              <div className="relative">
-                <label htmlFor="longitude" className="absolute -top-3 left-4 bg-gradient-to-r from-blue-50 to-blue-100 px-2 text-xs font-bold text-blue-700 uppercase">Longitude</label>
+                <label htmlFor="longitude" className={`absolute -top-3 left-4 px-2 text-xs font-bold uppercase ${
+                  isDark 
+                    ? 'bg-slate-800 text-blue-400' 
+                    : 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700'
+                }`}>Longitude</label>
                 <input
                     type="number"
                     id="longitude"
@@ -297,7 +327,11 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
                     onChange={handleChange}
                     step="0.0001"
                     placeholder="79.0882"
-                    className="w-full bg-white border-2 border-blue-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none text-slate-800 font-semibold hover:border-blue-400 transition-colors"
+                    className={`w-full border-2 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none font-semibold transition-colors ${
+                      isDark 
+                        ? 'bg-slate-700 border-slate-600 text-slate-100 hover:border-blue-400' 
+                        : 'bg-white border-blue-300 text-slate-800 hover:border-blue-400'
+                    }`}
                 />
              </div>
           </div>
@@ -307,7 +341,11 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
               type="button"
               onClick={handleGeolocation}
               disabled={isLocating}
-              className="flex-1 bg-gradient-to-r from-slate-600 to-slate-700 text-white hover:from-slate-700 hover:to-slate-800 px-4 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 border-2 border-slate-700 hover:shadow-lg hover:scale-105 disabled:opacity-75"
+              className={`flex-1 text-white px-4 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 border-2 hover:shadow-lg hover:scale-105 disabled:opacity-75 ${
+                isDark 
+                  ? 'bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 border-slate-700' 
+                  : 'bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 border-slate-700'
+              }`}
             >
               {isLocating ? <Loader2 size={18} className="animate-spin" /> : <Crosshair size={18} />}
               Current Location
@@ -326,7 +364,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
               Fetch Weather
             </button>
           </div>
-          <p className="text-xs text-slate-600 mt-3 italic">
+          <p className={`text-xs mt-3 italic ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
             💡 Tip: Use coordinates to auto-fill seasonal temperature & rainfall data
           </p>
         </div>
@@ -338,7 +376,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
                 <div className="p-2.5 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg">
                     <FlaskConical className="text-white" size={20} />
                 </div>
-                <h2 className="text-2xl font-bold text-slate-800">Soil Composition</h2>
+                <h2 className={`text-2xl font-bold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>Soil Composition</h2>
             </div>
             <div className="h-1 w-20 bg-gradient-to-r from-amber-400 to-amber-600 rounded-full mt-2"></div>
         </div>
@@ -352,7 +390,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
                 <div className="p-2.5 bg-gradient-to-br from-orange-400 to-orange-600 rounded-lg">
                     <Wind className="text-white" size={20} />
                 </div>
-                <h2 className="text-2xl font-bold text-slate-800">Climate Conditions</h2>
+                <h2 className={`text-2xl font-bold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>Climate Conditions</h2>
             </div>
             <div className="h-1 w-20 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full mt-2"></div>
         </div>

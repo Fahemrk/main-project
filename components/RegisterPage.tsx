@@ -1,5 +1,7 @@
+pip install shap lime
 import React, { useState } from 'react';
 import { Sprout, Lock, Mail, User, ArrowRight, ArrowLeft } from 'lucide-react';
+import { useTheme } from '../hooks/useTheme';
 import { register } from '../services/authService';
 import { login } from '../services/authService';
 import { setAuthToken } from '../services/predictionService';
@@ -10,6 +12,7 @@ interface RegisterPageProps {
 }
 
 const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister, onLoginClick }) => {
+  const { isDark } = useTheme();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -46,8 +49,8 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister, onLoginClick })
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
+    <div className={`min-h-screen flex items-center justify-center p-4 ${isDark ? 'bg-slate-950' : 'bg-slate-50'}`}>
+      <div className={`max-w-md w-full rounded-2xl shadow-xl overflow-hidden border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'}`}>
         <div className="bg-gradient-to-br from-green-600 to-emerald-700 p-8 text-center relative overflow-hidden">
            {/* Decorative circles */}
            <div className="absolute top-0 left-0 w-24 h-24 bg-white/10 rounded-full -translate-x-8 -translate-y-8"></div>
@@ -64,19 +67,23 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister, onLoginClick })
         
         <div className="p-8">
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-700">{error}</p>
+            <div className={`mb-4 p-3 rounded-lg border ${isDark ? 'bg-red-950 border-red-800' : 'bg-red-50 border-red-200'}`}>
+              <p className={`text-sm ${isDark ? 'text-red-300' : 'text-red-700'}`}>{error}</p>
             </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Username</label>
+              <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Username</label>
               <div className="relative group">
-                <User className="absolute left-3 top-3 text-slate-400 group-focus-within:text-green-600 transition-colors" size={20} />
+                <User className={`absolute left-3 top-3 group-focus-within:text-green-600 transition-colors ${isDark ? 'text-slate-500' : 'text-slate-400'}`} size={20} />
                 <input 
                   type="text" 
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all text-slate-800"
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all ${
+                    isDark 
+                      ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-500' 
+                      : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400'
+                  }`}
                   placeholder="your_username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -85,13 +92,17 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister, onLoginClick })
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Email Address</label>
+              <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Email Address</label>
               <div className="relative group">
-                <Mail className="absolute left-3 top-3 text-slate-400 group-focus-within:text-green-600 transition-colors" size={20} />
+                <Mail className={`absolute left-3 top-3 group-focus-within:text-green-600 transition-colors ${isDark ? 'text-slate-500' : 'text-slate-400'}`} size={20} />
                 <input 
                   type="email" 
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all text-slate-800"
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all ${
+                    isDark 
+                      ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-500' 
+                      : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400'
+                  }`}
                   placeholder="farmer@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -100,13 +111,17 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister, onLoginClick })
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Password</label>
+              <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Password</label>
               <div className="relative group">
-                <Lock className="absolute left-3 top-3 text-slate-400 group-focus-within:text-green-600 transition-colors" size={20} />
+                <Lock className={`absolute left-3 top-3 group-focus-within:text-green-600 transition-colors ${isDark ? 'text-slate-500' : 'text-slate-400'}`} size={20} />
                 <input 
                   type="password" 
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all text-slate-800"
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all ${
+                    isDark 
+                      ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-500' 
+                      : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400'
+                  }`}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -115,13 +130,17 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister, onLoginClick })
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Confirm Password</label>
+              <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Confirm Password</label>
               <div className="relative group">
-                <Lock className="absolute left-3 top-3 text-slate-400 group-focus-within:text-green-600 transition-colors" size={20} />
+                <Lock className={`absolute left-3 top-3 group-focus-within:text-green-600 transition-colors ${isDark ? 'text-slate-500' : 'text-slate-400'}`} size={20} />
                 <input 
                   type="password" 
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all text-slate-800"
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all ${
+                    isDark 
+                      ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-500' 
+                      : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400'
+                  }`}
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -132,7 +151,11 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister, onLoginClick })
             <button 
               type="submit" 
               disabled={isLoading}
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-lg transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-slate-200 mt-6"
+              className={`w-full text-white font-bold py-3.5 rounded-lg transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg mt-6 ${
+                isDark 
+                  ? 'bg-slate-700 hover:bg-slate-600 shadow-slate-900' 
+                  : 'bg-slate-900 hover:bg-slate-800 shadow-slate-200'
+              }`}
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">
@@ -150,10 +173,10 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister, onLoginClick })
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-slate-100 text-center">
+          <div className={`mt-6 pt-6 border-t text-center ${isDark ? 'border-slate-700' : 'border-slate-100'}`}>
             <button 
                 onClick={onLoginClick}
-                className="text-sm text-slate-500 hover:text-slate-800 flex items-center justify-center gap-2 mx-auto transition-colors"
+                className={`text-sm flex items-center justify-center gap-2 mx-auto transition-colors ${isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-800'}`}
             >
               <ArrowLeft size={16} /> Already have an account? <span className="text-green-600 font-bold hover:underline">Sign In</span>
             </button>

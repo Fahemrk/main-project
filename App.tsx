@@ -11,14 +11,17 @@ import RegisterPage from './components/RegisterPage';
 import LandingPage from './components/LandingPage';
 import ErrorBoundary from './components/ErrorBoundary';
 import ErrorAlert from './components/ErrorAlert';
-import { Sprout, BarChart3, BookOpen, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { ThemeProvider } from './context/ThemeContext';
+import { Sprout, BarChart3, BookOpen, ArrowLeft, CheckCircle2, Moon, Sun } from 'lucide-react';
+import { useTheme } from './hooks/useTheme';
 
 interface AppError {
   title: string;
   message: string;
 }
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const { isDark, toggleTheme } = useTheme();
   const [state, setState] = useState<AppState>(AppState.LANDING);
   const [inputData, setInputData] = useState<SoilData | null>(null);
   const [prediction, setPrediction] = useState<CropPrediction | null>(null);
@@ -126,7 +129,9 @@ const App: React.FC = () => {
   if (state === AppState.LANDING) {
     return (
       <ErrorBoundary>
-        <LandingPage onLogin={handleNavigateToLogin} onRegister={handleNavigateToRegister} />
+        <div className={isDark ? 'dark' : ''}>
+          <LandingPage onLogin={handleNavigateToLogin} onRegister={handleNavigateToRegister} />
+        </div>
       </ErrorBoundary>
     );
   }
@@ -135,7 +140,9 @@ const App: React.FC = () => {
   if (state === AppState.LOGIN) {
     return (
       <ErrorBoundary>
-        <LoginPage onLogin={handleLogin} onRegisterClick={handleNavigateToRegister} />
+        <div className={isDark ? 'dark' : ''}>
+          <LoginPage onLogin={handleLogin} onRegisterClick={handleNavigateToRegister} />
+        </div>
       </ErrorBoundary>
     );
   }
@@ -144,32 +151,41 @@ const App: React.FC = () => {
   if (state === AppState.REGISTER) {
     return (
       <ErrorBoundary>
-        <RegisterPage onRegister={handleRegisterSuccess} onLoginClick={handleNavigateToLogin} />
+        <div className={isDark ? 'dark' : ''}>
+          <RegisterPage onRegister={handleRegisterSuccess} onLoginClick={handleNavigateToLogin} />
+        </div>
       </ErrorBoundary>
     );
   }
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-slate-50 flex flex-col">
+      <div className={`min-h-screen ${isDark ? 'dark bg-slate-950' : 'bg-slate-50'} flex flex-col`}>
         {/* Header */}
-        <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <header className={`${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} border-b sticky top-0 z-50`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div className="flex items-center gap-2 cursor-pointer" onClick={handleLogoClick}>
               <div className="bg-green-600 p-2 rounded-lg">
                   <Sprout className="text-white" size={24} />
               </div>
-              <h1 className="text-xl font-bold text-slate-800 tracking-tight">
+              <h1 className={`text-xl font-bold ${isDark ? 'text-slate-100' : 'text-slate-800'} tracking-tight`}>
                 Smart Crop <span className="text-green-600">Guidance</span>
               </h1>
             </div>
             <div className="flex items-center gap-4">
-               <div className="text-sm text-slate-500 hidden sm:block">
+               <div className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'} hidden sm:block`}>
                 Powered by GA-RF Model & GenAI
               </div>
               <button 
+                onClick={toggleTheme}
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-600'}`}
+                aria-label="Toggle theme"
+              >
+                {isDark ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+              <button 
                 onClick={logout} 
-                className="text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-full transition-colors"
+                className={`text-sm font-medium px-4 py-2 rounded-full transition-colors ${isDark ? 'text-slate-300 hover:text-slate-100 bg-slate-800 hover:bg-slate-700' : 'text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200'}`}
               >
                 Sign Out
               </button>
@@ -192,10 +208,10 @@ const App: React.FC = () => {
           {state === AppState.INPUT && (
             <div className="animate-fade-in-up">
               <div className="text-center max-w-2xl mx-auto mb-10">
-                  <h2 className="text-3xl font-extrabold text-slate-900 sm:text-4xl mb-4">
+                  <h2 className={`text-3xl font-extrabold sm:text-4xl mb-4 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
                       Maximize Your Yield
                   </h2>
-                  <p className="text-lg text-slate-600">
+                  <p className={`text-lg ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                       Enter your soil and weather parameters below. Our hybrid Machine Learning model 
                       will predict the most profitable crop for your land.
                   </p>
@@ -207,11 +223,11 @@ const App: React.FC = () => {
         {state === AppState.PROCESSING && (
            <div className="flex flex-col items-center justify-center min-h-[50vh] animate-fade-in">
              <div className="relative">
-                <div className="w-24 h-24 border-4 border-slate-200 border-t-green-600 rounded-full animate-spin"></div>
+                <div className={`w-24 h-24 border-4 rounded-full animate-spin ${isDark ? 'border-slate-700 border-t-green-600' : 'border-slate-200 border-t-green-600'}`}></div>
                 <Sprout className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-green-600" size={32} />
              </div>
-             <h3 className="mt-8 text-xl font-semibold text-slate-800">{loadingStep}</h3>
-             <p className="text-slate-500 mt-2">Analyzing soil nutrient composition...</p>
+             <h3 className={`mt-8 text-xl font-semibold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>{loadingStep}</h3>
+             <p className={`mt-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Analyzing soil nutrient composition...</p>
            </div>
         )}
 
@@ -249,9 +265,9 @@ const App: React.FC = () => {
             </div>
 
             {/* Analysis Section - Full Width */}
-            <div className="bg-white rounded-xl shadow">
-                <div className="border-b border-slate-100 p-4">
-                    <h3 className="font-bold text-slate-800 flex items-center gap-2">
+            <div className={`rounded-xl shadow ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
+                <div className={`border-b p-4 ${isDark ? 'border-slate-700' : 'border-slate-100'}`}>
+                    <h3 className={`font-bold flex items-center gap-2 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                         <BarChart3 className="text-blue-600" size={20} /> Explainable AI Analysis
                     </h3>
                 </div>
@@ -269,14 +285,22 @@ const App: React.FC = () => {
 
       </main>
 
-        <footer className="bg-white border-t border-slate-200 mt-auto py-8">
-          <div className="container mx-auto px-4 text-center text-slate-500 text-sm">
+        <footer className={`border-t mt-auto py-8 ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
+          <div className={`container mx-auto px-4 text-center text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
             <p>&copy; {new Date().getFullYear()} Smart Crop Guidance System.</p>
             <p className="mt-2">Based on research: "An Approach for Crop Prediction in Agriculture: Integrating Genetic Algorithms and Machine Learning"</p>
           </div>
         </footer>
       </div>
     </ErrorBoundary>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 };
 

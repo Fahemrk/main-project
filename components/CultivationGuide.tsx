@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useTheme } from '../hooks/useTheme';
 
 interface GuideProps {
   guide: string;
@@ -7,13 +8,14 @@ interface GuideProps {
 }
 
 const CultivationGuide: React.FC<GuideProps> = ({ guide, crop }) => {
+  const { isDark } = useTheme();
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-green-100 overflow-hidden">
-      <div className="bg-green-50 px-8 py-6 border-b border-green-100">
-        <h2 className="text-2xl font-bold text-green-900 flex items-center gap-3">
+    <div className={`rounded-xl shadow-lg border overflow-hidden ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-green-100'}`}>
+      <div className={`px-8 py-6 border-b ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-green-50 border-green-100'}`}>
+        <h2 className={`text-2xl font-bold flex items-center gap-3 ${isDark ? 'text-green-400' : 'text-green-900'}`}>
           🌱 Cultivation Guide: {crop}
         </h2>
-        <p className="text-green-700 mt-1">AI-Generated personalized roadmap for your farm</p>
+        <p className={`mt-1 ${isDark ? 'text-slate-400' : 'text-green-700'}`}>AI-Generated personalized roadmap for your farm</p>
       </div>
       
       <div className="p-8">
@@ -21,25 +23,25 @@ const CultivationGuide: React.FC<GuideProps> = ({ guide, crop }) => {
           <ReactMarkdown
             components={{
               h1: ({ node, ...props }) => (
-                <h1 className="text-3xl font-bold text-green-900 mt-8 mb-4" {...props} />
+                <h1 className={`text-3xl font-bold mt-8 mb-4 ${isDark ? 'text-green-400' : 'text-green-900'}`} {...props} />
               ),
               h2: ({ node, ...props }) => (
-                <h2 className="text-2xl font-bold text-green-800 mt-7 mb-3" {...props} />
+                <h2 className={`text-2xl font-bold mt-7 mb-3 ${isDark ? 'text-green-400' : 'text-green-800'}`} {...props} />
               ),
               h3: ({ node, ...props }) => (
-                <h3 className="text-xl font-bold text-green-800 mt-6 mb-3" {...props} />
+                <h3 className={`text-xl font-bold mt-6 mb-3 ${isDark ? 'text-green-400' : 'text-green-800'}`} {...props} />
               ),
               h4: ({ node, ...props }) => (
-                <h4 className="text-lg font-semibold text-green-700 mt-5 mb-2" {...props} />
+                <h4 className={`text-lg font-semibold mt-5 mb-2 ${isDark ? 'text-green-400' : 'text-green-700'}`} {...props} />
               ),
               p: ({ node, ...props }) => (
-                <p className="text-slate-700 mb-3 leading-relaxed" {...props} />
+                <p className={`mb-3 leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-700'}`} {...props} />
               ),
               strong: ({ node, ...props }) => (
-                <strong className="font-bold text-slate-900" {...props} />
+                <strong className={`font-bold ${isDark ? 'text-slate-200' : 'text-slate-900'}`} {...props} />
               ),
               em: ({ node, ...props }) => (
-                <em className="italic text-slate-700" {...props} />
+                <em className={`italic ${isDark ? 'text-slate-300' : 'text-slate-700'}`} {...props} />
               ),
               ul: ({ node, ...props }) => (
                 <ul className="list-disc list-inside ml-4 mb-3 space-y-1" {...props} />
