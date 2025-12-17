@@ -6,10 +6,27 @@ import { sanitizeJSON, validateSoilData, validateCoordinates } from '../utils/sa
 const API_URL = process.env.VITE_API_URL || 'http://localhost:5000';
 const CACHE_TTL_MS = 3600000;
 
+export const getAuthToken = (): string | null => {
+  return localStorage.getItem('access_token');
+};
+
+export const setAuthToken = (token: string): void => {
+  localStorage.setItem('access_token', token);
+};
+
+export const clearAuthToken = (): void => {
+  localStorage.removeItem('access_token');
+};
+
 export const predictCrop = async (input: SoilData): Promise<CropPrediction> => {
   try {
     validateCoordinates(input.latitude!, input.longitude!);
     validateSoilData(input);
+
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error('Authentication token not found. Please log in.');
+    }
 
     const cacheKey = getCacheKey('/predict', input);
     const cached = getCache<CropPrediction>(cacheKey);
@@ -31,12 +48,15 @@ export const predictCrop = async (input: SoilData): Promise<CropPrediction> => {
           humidity: input.humidity,
           ph: input.ph,
           rainfall: input.rainfall,
+          latitude: input.latitude,
+          longitude: input.longitude,
         };
 
         const response = await fetch(`${API_URL}/predict`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify(requestBody),
           signal: controller.signal,
@@ -60,16 +80,12 @@ export const predictCrop = async (input: SoilData): Promise<CropPrediction> => {
           throw new Error('Invalid response from server - missing crop prediction');
         }
 
-        if (!data.shapValues || !data.limeExplanation) {
-          throw new Error('Backend response incomplete - missing SHAP/LIME values');
-        }
-
         return {
           crop: data.crop,
           confidence: data.confidence || 0,
           probabilities: data.probabilities || [],
-          shapValues: sanitizeJSON(data.shapValues),
-          limeExplanation: sanitizeJSON(data.limeExplanation),
+          shapValues: data.shapValues ? sanitizeJSON(data.shapValues) : [],
+          limeExplanation: data.limeExplanation ? sanitizeJSON(data.limeExplanation) : null,
         };
       },
       { maxRetries: 3, initialDelayMs: 1000, maxDelayMs: 5000 }

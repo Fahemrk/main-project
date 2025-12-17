@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Sprout, Lock, Mail, User, ArrowRight, ArrowLeft } from 'lucide-react';
+import { register } from '../services/authService';
+import { login } from '../services/authService';
+import { setAuthToken } from '../services/predictionService';
 
 interface RegisterPageProps {
   onRegister: () => void;
@@ -7,27 +10,39 @@ interface RegisterPageProps {
 }
 
 const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister, onLoginClick }) => {
-  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match!");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long");
       return;
     }
 
     setIsLoading(true);
     
-    // Simulate API registration delay
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await register(username, email, password);
+      const loginResponse = await login(username, password);
+      setAuthToken(loginResponse.access_token);
       onRegister();
-    }, 1500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Registration failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -48,18 +63,23 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister, onLoginClick })
         </div>
         
         <div className="p-8">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Full Name</label>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Username</label>
               <div className="relative group">
                 <User className="absolute left-3 top-3 text-slate-400 group-focus-within:text-green-600 transition-colors" size={20} />
                 <input 
                   type="text" 
                   required
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all text-slate-800"
-                  placeholder="John Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  placeholder="your_username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                 />
               </div>
             </div>

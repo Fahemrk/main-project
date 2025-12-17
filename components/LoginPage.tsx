@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Sprout, Lock, Mail, ArrowRight } from 'lucide-react';
+import { login } from '../services/authService';
+import { setAuthToken } from '../services/predictionService';
 
 interface LoginPageProps {
   onLogin: () => void;
@@ -7,19 +9,25 @@ interface LoginPageProps {
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegisterClick }) => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
-    // Simulate API authentication delay
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const response = await login(username, password);
+      setAuthToken(response.access_token);
       onLogin();
-    }, 1000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -52,18 +60,23 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onRegisterClick }) => {
         </div>
         
         <div className="p-8">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Email Address</label>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Username</label>
               <div className="relative group">
                 <Mail className="absolute left-3 top-3 text-slate-400 group-focus-within:text-green-600 transition-colors" size={20} />
                 <input 
-                  type="email" 
+                  type="text" 
                   required
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all text-slate-800"
-                  placeholder="farmer@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your_username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                 />
               </div>
             </div>

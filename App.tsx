@@ -1,8 +1,7 @@
-const apiKey = process.env.GEMINI_API_KEY;
-
 import React, { useState, useEffect } from 'react';
 import { AppState, SoilData, CropPrediction } from './types';
-import { predictCrop } from './services/predictionService';
+import { predictCrop, getAuthToken, clearAuthToken } from './services/predictionService';
+import { logout as logoutAPI } from './services/authService';
 import { getCultivationGuide } from './services/geminiService';
 import InputForm from './components/InputForm';
 import XAICharts from './components/XAICharts';
@@ -26,6 +25,13 @@ const App: React.FC = () => {
   const [guide, setGuide] = useState<string>('');
   const [loadingStep, setLoadingStep] = useState<string>('');
   const [error, setError] = useState<AppError | null>(null);
+
+  useEffect(() => {
+    const token = getAuthToken();
+    if (token) {
+      setState(AppState.INPUT);
+    }
+  }, []);
 
   const handleLogin = () => {
     setState(AppState.INPUT);
@@ -89,7 +95,16 @@ const App: React.FC = () => {
     setGuide('');
   };
 
-  const logout = () => {
+  const logout = async () => {
+    const token = getAuthToken();
+    if (token) {
+      try {
+        await logoutAPI(token);
+      } catch (err) {
+        console.warn('Logout API call failed:', err);
+      }
+    }
+    clearAuthToken();
     setState(AppState.LANDING);
     setPrediction(null);
     setGuide('');
