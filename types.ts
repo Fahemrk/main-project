@@ -26,7 +26,9 @@ export enum AppState {
   REGISTER,
   INPUT,
   PROCESSING,
-  RESULT
+  RESULT,
+  YIELD_PREDICTION,
+  CROP_LOOKUP
 }
 
 export interface CultivationGuide {

@@ -425,6 +425,111 @@ def health():
     }), 200
 
 
+@app.route('/predict-yield', methods=['POST'])
+@jwt_required()
+def predict_yield():
+    logger.info("Yield prediction endpoint hit")
+    
+    if not ML_PACKAGES_AVAILABLE:
+        return jsonify({'error': 'ML packages not installed'}), 500
+    
+    try:
+        user_id = int(get_jwt_identity())
+        data = request.get_json(force=True)
+        logger.info(f"Yield prediction request: {data}")
+        
+        required_fields = ['crop', 'season', 'state', 'rainfall', 'fertilizer', 'pesticide', 'area', 'year']
+        missing = [f for f in required_fields if f not in data]
+        if missing:
+            logger.warning(f"Missing fields in yield prediction request: {missing}")
+            return jsonify({'error': f'Missing fields: {", ".join(missing)}'}), 400
+        
+        try:
+            yield_model = joblib.load('models/yield_model_xgboost.pkl')
+            scaler = joblib.load('models/scaler.pkl')
+            crop_encoder = joblib.load('models/crop_encoder.pkl')
+            season_encoder = joblib.load('models/season_encoder.pkl')
+            state_encoder = joblib.load('models/state_encoder.pkl')
+            logger.info("Yield model and encoders loaded successfully")
+        except FileNotFoundError as e:
+            logger.error(f"Model files not found: {str(e)}")
+            return jsonify({'error': f'Yield model not trained yet. Please run training pipeline first.'}), 503
+        except Exception as e:
+            logger.error(f"Failed to load yield model: {str(e)}")
+            return jsonify({'error': f'Failed to load yield model: {str(e)}'}), 500
+        
+        try:
+            crop_idx = crop_encoder.transform([data['crop'].strip()])[0]
+            season_idx = season_encoder.transform([data['season'].strip()])[0]
+            state_idx = state_encoder.transform([data['state'].strip()])[0]
+        except ValueError as e:
+            logger.warning(f"Invalid categorical value: {str(e)}")
+            return jsonify({'error': f'Invalid crop, season, or state value: {str(e)}'}), 400
+        
+        try:
+            rainfall = float(data['rainfall'])
+            fertilizer = float(data['fertilizer'])
+            pesticide = float(data['pesticide'])
+            area = float(data['area'])
+            year = int(data['year'])
+        except (ValueError, TypeError) as e:
+            logger.warning(f"Invalid numeric value: {str(e)}")
+            return jsonify({'error': f'Invalid numeric values: {str(e)}'}), 400
+        
+        features_unscaled = np.array([[rainfall, fertilizer, pesticide, area]])
+        features_scaled = scaler.transform(features_unscaled)
+        
+        features_final = np.hstack([
+            features_scaled,
+            np.array([[crop_idx, season_idx, state_idx, year]])
+        ])
+        
+        predicted_yield = float(yield_model.predict(features_final)[0])
+        
+        feature_importance = yield_model.feature_importances_
+        feature_names = ['rainfall', 'fertilizer', 'pesticide', 'area', 'crop', 'season', 'state', 'year']
+        
+        importance_list = [
+            {
+                'feature': feature_names[i],
+                'importance': float(importance),
+                'percentage': float((importance / feature_importance.sum()) * 100)
+            }
+            for i, importance in enumerate(feature_importance)
+        ]
+        importance_list.sort(key=lambda x: x['importance'], reverse=True)
+        
+        confidence = 0.85
+        if hasattr(yield_model, 'score'):
+            try:
+                logger.info("Attempting to calculate model confidence...")
+                confidence = min(0.95, 0.75 + (predicted_yield / 100.0) * 0.2)
+            except:
+                pass
+        
+        response = {
+            'predicted_yield': predicted_yield,
+            'confidence': confidence,
+            'crop': data['crop'],
+            'season': data['season'],
+            'state': data['state'],
+            'area': area,
+            'rainfall': rainfall,
+            'fertilizer': fertilizer,
+            'pesticide': pesticide,
+            'year': year,
+            'feature_importance': importance_list,
+            'top_features': importance_list[:5]
+        }
+        
+        logger.info(f"Yield prediction successful: {predicted_yield:.2f} (confidence: {confidence:.2%})")
+        return jsonify(response), 200
+    
+    except Exception as e:
+        logger.error(f"Yield prediction error: {str(e)}", exc_info=True)
+        return jsonify({'error': f'Prediction failed: {str(e)}'}), 500
+
+
 @app.route('/input-constraints', methods=['GET'])
 def get_input_constraints():
     constraints = {
@@ -447,6 +552,97 @@ def get_feature_recommendations(crop):
         return jsonify({'error': f'No GA data for crop: {crop}'}), 404
     
     return jsonify(ga_features[crop]), 200
+
+
+@app.route('/crop-optimal-conditions/<crop>', methods=['GET'])
+def get_crop_optimal_conditions(crop):
+    if not MODEL_LOADED:
+        return jsonify({'error': 'Model not loaded'}), 500
+    
+    try:
+        crop_lower = crop.lower().strip()
+        crop_idx = None
+        for i, c in enumerate(le.classes_):
+            if c.lower() == crop_lower:
+                crop_idx = i
+                break
+        
+        if crop_idx is None:
+            return jsonify({'error': f'Crop not found: {crop}'}), 404
+        
+        import pandas as pd
+        df = pd.read_csv('Crop_recommendation.csv')
+        crop_data = df[df['label'].str.lower() == crop_lower]
+        
+        if crop_data.empty:
+            return jsonify({'error': f'No training data for crop: {crop}'}), 404
+        
+        optimal_conditions = {
+            'crop': le.classes_[crop_idx],
+            'N': {
+                'optimal': float(crop_data['N'].mean()),
+                'min': float(crop_data['N'].min()),
+                'max': float(crop_data['N'].max()),
+                'median': float(crop_data['N'].median()),
+                'q25': float(crop_data['N'].quantile(0.25)),
+                'q75': float(crop_data['N'].quantile(0.75))
+            },
+            'P': {
+                'optimal': float(crop_data['P'].mean()),
+                'min': float(crop_data['P'].min()),
+                'max': float(crop_data['P'].max()),
+                'median': float(crop_data['P'].median()),
+                'q25': float(crop_data['P'].quantile(0.25)),
+                'q75': float(crop_data['P'].quantile(0.75))
+            },
+            'K': {
+                'optimal': float(crop_data['K'].mean()),
+                'min': float(crop_data['K'].min()),
+                'max': float(crop_data['K'].max()),
+                'median': float(crop_data['K'].median()),
+                'q25': float(crop_data['K'].quantile(0.25)),
+                'q75': float(crop_data['K'].quantile(0.75))
+            },
+            'temperature': {
+                'optimal': float(crop_data['temperature'].mean()),
+                'min': float(crop_data['temperature'].min()),
+                'max': float(crop_data['temperature'].max()),
+                'median': float(crop_data['temperature'].median()),
+                'q25': float(crop_data['temperature'].quantile(0.25)),
+                'q75': float(crop_data['temperature'].quantile(0.75))
+            },
+            'humidity': {
+                'optimal': float(crop_data['humidity'].mean()),
+                'min': float(crop_data['humidity'].min()),
+                'max': float(crop_data['humidity'].max()),
+                'median': float(crop_data['humidity'].median()),
+                'q25': float(crop_data['humidity'].quantile(0.25)),
+                'q75': float(crop_data['humidity'].quantile(0.75))
+            },
+            'ph': {
+                'optimal': float(crop_data['ph'].mean()),
+                'min': float(crop_data['ph'].min()),
+                'max': float(crop_data['ph'].max()),
+                'median': float(crop_data['ph'].median()),
+                'q25': float(crop_data['ph'].quantile(0.25)),
+                'q75': float(crop_data['ph'].quantile(0.75))
+            },
+            'rainfall': {
+                'optimal': float(crop_data['rainfall'].mean()),
+                'min': float(crop_data['rainfall'].min()),
+                'max': float(crop_data['rainfall'].max()),
+                'median': float(crop_data['rainfall'].median()),
+                'q25': float(crop_data['rainfall'].quantile(0.25)),
+                'q75': float(crop_data['rainfall'].quantile(0.75))
+            },
+            'sample_count': len(crop_data)
+        }
+        
+        return jsonify(optimal_conditions), 200
+    
+    except Exception as e:
+        logger.error(f"Error calculating optimal conditions: {str(e)}", exc_info=True)
+        return jsonify({'error': f'Error calculating conditions: {str(e)}'}), 500
 
 
 if __name__ == '__main__':

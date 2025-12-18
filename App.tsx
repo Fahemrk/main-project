@@ -4,6 +4,8 @@ import { predictCrop, getAuthToken, clearAuthToken } from './services/prediction
 import { logout as logoutAPI } from './services/authService';
 import { getCultivationGuide } from './services/geminiService';
 import InputForm from './components/InputForm';
+import CropLookup from './components/CropLookup';
+import YieldPrediction from './components/YieldPrediction';
 import XAICharts from './components/XAICharts';
 import CultivationGuide from './components/CultivationGuide';
 import LoginPage from './components/LoginPage';
@@ -216,7 +218,73 @@ const AppContent: React.FC = () => {
                       will predict the most profitable crop for your land.
                   </p>
               </div>
+              
+              <div className="flex justify-center gap-4 mb-8">
+                <button
+                  onClick={() => setState(AppState.INPUT)}
+                  className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
+                    state === AppState.INPUT
+                      ? isDark ? 'bg-green-600 text-white' : 'bg-green-600 text-white'
+                      : isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  }`}
+                >
+                  Crop Prediction
+                </button>
+                <button
+                  onClick={() => setState(AppState.YIELD_PREDICTION)}
+                  className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
+                    state === AppState.YIELD_PREDICTION
+                      ? isDark ? 'bg-blue-600 text-white' : 'bg-blue-600 text-white'
+                      : isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  }`}
+                >
+                  Yield Prediction
+                </button>
+                <button
+                  onClick={() => setState(AppState.CROP_LOOKUP)}
+                  className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
+                    state === AppState.CROP_LOOKUP
+                      ? isDark ? 'bg-emerald-600 text-white' : 'bg-emerald-600 text-white'
+                      : isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  }`}
+                >
+                  Crop Lookup
+                </button>
+              </div>
+              
               <InputForm onSubmit={handleFormSubmit} isLoading={false} />
+            </div>
+          )}
+
+          {state === AppState.YIELD_PREDICTION && (
+            <div className="animate-fade-in-up">
+              <YieldPrediction />
+              <div className="mt-8 flex justify-center gap-4">
+                <button
+                  onClick={() => setState(AppState.INPUT)}
+                  className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
+                    isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  }`}
+                >
+                  ← Back to Crop Prediction
+                </button>
+              </div>
+            </div>
+          )}
+
+          {state === AppState.CROP_LOOKUP && (
+            <div className="animate-fade-in-up">
+              <div className="mb-8 flex justify-center gap-4">
+                <button
+                  onClick={() => setState(AppState.INPUT)}
+                  className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
+                    isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  }`}
+                >
+                  ← Back to Crop Prediction
+                </button>
+              </div>
+              <CropLookup />
             </div>
           )}
 
