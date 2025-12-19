@@ -6,11 +6,11 @@ interface YieldData {
   crop: string;
   season: string;
   state: string;
-  rainfall: number;
-  fertilizer: number;
-  pesticide: number;
-  area: number;
-  year: number;
+  rainfall: number | string;
+  fertilizer: number | string;
+  pesticide: number | string;
+  area: number | string;
+  year: number | string;
 }
 
 interface YieldPredictionResult {
@@ -71,7 +71,7 @@ const YieldPrediction: React.FC = () => {
     
     setFormData(prev => ({
       ...prev,
-      [name]: isNaN(Number(value)) ? value : Number(value)
+      [name]: value
     }));
   };
 
@@ -89,13 +89,22 @@ const YieldPrediction: React.FC = () => {
         return;
       }
 
+      const payload = {
+        ...formData,
+        rainfall: Number(formData.rainfall),
+        fertilizer: Number(formData.fertilizer),
+        pesticide: Number(formData.pesticide),
+        area: Number(formData.area) * 0.404686, // Convert acres to hectares
+        year: Number(formData.year)
+      };
+
       const response = await fetch('http://localhost:5000/predict-yield', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
@@ -206,7 +215,7 @@ const YieldPrediction: React.FC = () => {
 
                 <div>
                   <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    Area (hectares)
+                    Area (acres)
                   </label>
                   <input
                     type="number"
@@ -214,7 +223,7 @@ const YieldPrediction: React.FC = () => {
                     value={formData.area}
                     onChange={handleChange}
                     min="0"
-                    step="10"
+                    step="any"
                     className={`w-full border-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       isDark
                         ? 'bg-slate-700 border-slate-600 text-slate-100'
@@ -233,7 +242,7 @@ const YieldPrediction: React.FC = () => {
                     value={formData.rainfall}
                     onChange={handleChange}
                     min="0"
-                    step="10"
+                    step="any"
                     className={`w-full border-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       isDark
                         ? 'bg-slate-700 border-slate-600 text-slate-100'
@@ -244,7 +253,7 @@ const YieldPrediction: React.FC = () => {
 
                 <div>
                   <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    Fertilizer Used
+                    Fertilizer Used (in kg)
                   </label>
                   <input
                     type="number"
@@ -252,7 +261,7 @@ const YieldPrediction: React.FC = () => {
                     value={formData.fertilizer}
                     onChange={handleChange}
                     min="0"
-                    step="1000"
+                    step="any"
                     className={`w-full border-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       isDark
                         ? 'bg-slate-700 border-slate-600 text-slate-100'
@@ -263,7 +272,7 @@ const YieldPrediction: React.FC = () => {
 
                 <div>
                   <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    Pesticide Used
+                    Pesticide Used (in kg)
                   </label>
                   <input
                     type="number"
@@ -271,7 +280,7 @@ const YieldPrediction: React.FC = () => {
                     value={formData.pesticide}
                     onChange={handleChange}
                     min="0"
-                    step="10"
+                    step="any"
                     className={`w-full border-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       isDark
                         ? 'bg-slate-700 border-slate-600 text-slate-100'
@@ -350,10 +359,10 @@ const YieldPrediction: React.FC = () => {
                       Predicted Yield
                     </p>
                     <p className={`text-4xl font-extrabold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
-                      {result.predicted_yield.toFixed(2)}
+                      {(result.predicted_yield * 0.404686).toFixed(2)}
                     </p>
                     <p className={`text-sm mt-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                      metric tons/hectare
+                      metric tons/acre
                     </p>
                   </div>
 
@@ -392,7 +401,7 @@ const YieldPrediction: React.FC = () => {
                     </div>
                     <div>
                       <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Area:</span>
-                      <p className={`font-semibold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>{result.area} hectares</p>
+                      <p className={`font-semibold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>{(result.area / 0.404686).toFixed(2)} acres</p>
                     </div>
                     <div>
                       <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Rainfall:</span>

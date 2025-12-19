@@ -73,10 +73,16 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
         setIsLocating(false);
       },
       (error) => {
-        console.error(error);
-        alert("Unable to retrieve your location. Please enter manually.");
+        console.error("Geolocation error:", error);
+        let errorMessage = "Unable to retrieve your location.";
+        if (error.code === 1) errorMessage = "Location access denied. Please enable permissions.";
+        else if (error.code === 2) errorMessage = "Location unavailable. Check your GPS or network.";
+        else if (error.code === 3) errorMessage = "Location request timed out.";
+        
+        alert(errorMessage + " Please enter manually.");
         setIsLocating(false);
-      }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
