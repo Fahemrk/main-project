@@ -5,113 +5,95 @@ alwaysApply: true
 
 # Smart Crop Guidance System Information
 
-## Summary
-This is an AI-powered web application that provides intelligent crop guidance based on soil and environmental data. Built with React and TypeScript, it leverages Google's Gemini API for AI-driven recommendations and explainable AI (XAI) features like SHAP values and LIME explanations for crop predictions.
+## Repository Summary
+The Smart Crop Guidance System is a full-stack AI application designed to provide smart crop recommendations based on soil and environmental parameters. It utilizes a trained RandomForest model for predictions and integrates Google Gemini API for personalized cultivation guidance. The system also includes XAI (Explainable AI) features using SHAP and LIME to explain model predictions.
 
-## Structure
-```
-├── components/           # React UI components
-│   ├── CultivationGuide.tsx    # Displays crop cultivation guidance
-│   ├── InputForm.tsx           # Soil data input form
-│   ├── LandingPage.tsx         # Landing/home page
-│   ├── LoginPage.tsx           # User authentication
-│   ├── RegisterPage.tsx        # User registration
-│   └── XAICharts.tsx           # Explainable AI visualization
-├── services/            # Business logic services
-│   ├── geminiService.ts        # Google Gemini API integration
-│   └── predictionService.ts    # Crop prediction engine
-├── App.tsx              # Main application component
-├── index.tsx            # React entry point
-├── types.ts             # TypeScript type definitions
-├── vite.config.ts       # Vite configuration
-├── tsconfig.json        # TypeScript configuration
-├── package.json         # Dependencies and scripts
-└── .env.local           # Environment variables (API keys)
-```
+## Repository Structure
+- **Root**: Contains the React + TypeScript frontend application and project configuration files.
+- **backend/**: Contains the Flask API server, machine learning models, and data processing scripts.
+- **components/**: React components for the frontend (Input forms, charts, pages).
+- **services/**: Frontend service layers for API communication (Auth, Gemini, Predictions).
+- **scripts/**: Utility scripts for data generation and analysis.
+- **utils/**: Shared utility functions for the frontend (caching, retries, sanitization).
 
-## Language & Runtime
+### Main Repository Components
+- **Frontend**: A Vite-powered React application with TypeScript, focusing on data visualization and user interaction.
+- **Backend**: A Flask-based API serving machine learning predictions and managing user authentication.
+- **ML Engine**: A suite of Python scripts for training, optimizing (using Genetic Algorithms), and exporting the RandomForest model.
+
+## Projects
+
+### Frontend (React Application)
+**Configuration File**: `package.json`, `vite.config.ts`, `tsconfig.json`
+
+#### Language & Runtime
 **Language**: TypeScript  
-**Target**: ES2022  
-**Runtime**: Node.js (via npm)  
-**Package Manager**: npm  
-**Build System**: Vite 6.2.0
+**Version**: TypeScript ~5.8.2  
+**Build System**: Vite ^6.2.0  
+**Package Manager**: npm
 
-## Dependencies
-
+#### Dependencies
 **Main Dependencies**:
-- **react**: ^19.2.0 — UI framework
-- **react-dom**: ^19.2.0 — React DOM rendering
-- **@google/genai**: ^1.30.0 — Google Gemini API client
-- **lucide-react**: ^0.555.0 — Icon library
-- **recharts**: ^3.5.1 — Charting library for XAI visualizations
-- **react-markdown**: ^10.1.0 — Markdown rendering
+- `@google/genai`: For Gemini API integration.
+- `react`, `react-dom`: UI framework (v19).
+- `lucide-react`: Icon library.
+- `recharts`: For data visualization and XAI charts.
+- `react-markdown`: For rendering AI-generated guides.
 
 **Development Dependencies**:
-- **typescript**: ~5.8.2 — TypeScript compiler
-- **vite**: ^6.2.0 — Build tool and dev server
-- **@vitejs/plugin-react**: ^5.0.0 — React plugin for Vite
-- **@types/node**: ^22.14.0 — Node.js type definitions
+- `@vitejs/plugin-react`: Vite plugin for React.
+- `typescript`: For static typing.
 
-## Build & Installation
-
-**Install dependencies**:
+#### Build & Installation
 ```bash
+# Install dependencies
 npm install
-```
 
-**Development server** (runs on port 3000):
-```bash
+# Run development server
 npm run dev
-```
 
-**Production build**:
-```bash
+# Build for production
 npm run build
 ```
 
-**Preview production build**:
+### Backend (Flask API)
+**Configuration File**: `backend/requirements.txt`, `backend/app.py`
+
+#### Language & Runtime
+**Language**: Python  
+**Version**: Python 3.8+  
+**Build System**: Python Scripts  
+**Package Manager**: pip
+
+#### Dependencies
+**Main Dependencies**:
+- `flask`: Web framework.
+- `flask-cors`, `flask-sqlalchemy`, `flask-jwt-extended`: Flask extensions for CORS, DB, and Auth.
+- `scikit-learn`: For machine learning model serving.
+- `shap`, `lime`: For Explainable AI (XAI).
+- `numpy`, `pandas`: Data manipulation.
+- `joblib`: For model serialization.
+
+#### Build & Installation
 ```bash
-npm run preview
+# Navigate to backend directory
+cd backend
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Export the trained model (requires Crop_recommendation.csv)
+python export_model.py
+
+# Run the Flask server
+python app.py
 ```
 
-## Configuration
-
-**Environment Variables** (.env.local):
-- `GEMINI_API_KEY` — API key for Google Gemini (required for AI features)
-
-**Vite Configuration** (vite.config.ts):
-- Dev server: `http://0.0.0.0:3000`
-- Aliases: `@` resolves to project root
-- Loads and exposes `GEMINI_API_KEY` from .env files
-
-**TypeScript Configuration** (tsconfig.json):
-- Module system: ESNext
-- Module resolution: bundler
-- JSX: react-jsx
-
-## Main Entry Points
-- **index.tsx**: React application bootstrap
-- **App.tsx**: Main application component managing navigation and state
-- **components/**: UI components for different application screens
-- **services/**: Core business logic (crop prediction, Gemini API integration)
-
-## Application State
-The app manages multiple views via `AppState` enum:
-- Landing page for onboarding
-- Login/Registration for authentication
-- InputForm for soil data entry
-- Prediction results with XAI visualizations
-- CultivationGuide with AI-generated recommendations
-
-## Data Models
-
-**SoilData Interface** (types.ts):
-- Location coordinates (latitude, longitude)
-- Soil nutrients: N, P, K values
-- Environmental data: temperature, humidity, pH, rainfall
-
-**CropPrediction Interface**:
-- Predicted crop and confidence score
-- Probability distribution across crop varieties
-- SHAP values for feature importance
-- LIME explanations for model interpretability
+#### Main Files & Resources
+- `backend/app.py`: Main entry point for the Flask API.
+- `backend/auth.py`: Authentication logic and routes.
+- `backend/models.py`: Database models for SQLAlchemy.
+- `backend/crop_model.joblib`: Trained RandomForest model.
+- `backend/label_encoder.joblib`: Encoder for crop labels.
+- `backend/ga_feature_selection.py`: Genetic Algorithm for feature selection.
+- `backend/train_yield_xgboost_ga.py`: XGBoost training script with GA optimization.
