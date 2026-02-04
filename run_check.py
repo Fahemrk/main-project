@@ -32,7 +32,7 @@ print("\n" + "=" * 70)
 csv_exists = os.path.exists('crop_yield.csv')
 if csv_exists:
     print("\n✅ CSV found. Running data preparation...")
-    result = subprocess.run([sys.executable, 'prepare_yield_data.py'], 
+    result = subprocess.run([sys.executable, 'prepare_yield_final.py'], 
                           capture_output=True, text=True)
     if "✅ All preprocessed" in result.stdout or result.returncode == 0:
         print("✅ Data preparation succeeded")
@@ -46,8 +46,8 @@ if csv_exists:
     # Now run training
     if os.path.exists('models/X_train_data.pkl'):
         print("\n📚 Training data found. Running GA training...")
-        result = subprocess.run([sys.executable, 'train_yield_ga.py'],
-                              capture_output=True, text=True, timeout=600)
+        result = subprocess.run([sys.executable, 'train_yield_xgboost_ga.py'],
+                              capture_output=True, text=True, timeout=1200)
         if result.returncode == 0:
             print("✅ Training succeeded")
         else:

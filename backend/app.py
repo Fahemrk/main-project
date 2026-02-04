@@ -51,6 +51,9 @@ jwt = JWTManager(app)
 
 app.register_blueprint(auth_bp)
 
+from price_prediction import price_bp
+app.register_blueprint(price_bp)
+
 @app.before_request
 def log_request():
     logger.info(f"Request: {request.method} {request.path}")
@@ -114,11 +117,16 @@ if not ML_PACKAGES_AVAILABLE:
     logger.warning("  Install with: pip install numpy scikit-learn shap lime joblib")
 else:
     try:
-        model = joblib.load('crop_model.joblib')
-        logger.info("✓ Model loaded successfully: crop_model.joblib")
+        model = joblib.load('crop_model_optimized.joblib')
+        logger.info("✓ Model loaded successfully: crop_model_optimized.joblib")
     except FileNotFoundError:
-        logger.error("✗ Model file not found: crop_model.joblib")
-        logger.error("   Run 'python export_model.py' first to generate the model file.")
+        logger.error("✗ Model file not found: crop_model_optimized.joblib")
+        logger.error("   Using original model as fallback...")
+        try:
+            model = joblib.load('crop_model.joblib')
+            logger.info("✓ Fallback model loaded successfully: crop_model.joblib")
+        except FileNotFoundError:
+            logger.error("✗ Fallback model also not found.")
     except Exception as e:
         logger.error(f"✗ Failed to load model: {type(e).__name__}: {str(e)}")
 
