@@ -9,6 +9,7 @@ import YieldPrediction from './components/YieldPrediction';
 import PricePrediction from './components/PricePrediction';
 import XAICharts from './components/XAICharts';
 import CultivationGuide from './components/CultivationGuide';
+import AboutUs from './components/AboutUs';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import LandingPage from './components/LandingPage';
@@ -81,6 +82,12 @@ const AppContent: React.FC = () => {
 
       console.error('Prediction error:', err);
 
+      if (errorMessage.includes('Session expired') || errorMessage.includes('Please log in')) {
+        clearAuthToken();
+        setState(AppState.LOGIN);
+        return;
+      }
+
       setError({
         title: 'Analysis Failed',
         message: errorMessage || 'Could not complete crop analysis. Please check your inputs and try again.',
@@ -119,7 +126,16 @@ const AppContent: React.FC = () => {
 
   // Logic to handle logo click based on auth state
   const handleLogoClick = () => {
-    if ([AppState.INPUT, AppState.PROCESSING, AppState.RESULT].includes(state)) {
+    // Check if user is in any authenticated state
+    if ([
+      AppState.INPUT,
+      AppState.PROCESSING,
+      AppState.RESULT,
+      AppState.YIELD_PREDICTION,
+      AppState.PRICE_PREDICTION,
+      AppState.CROP_LOOKUP,
+      AppState.ABOUT_US
+    ].includes(state)) {
       // User is logged in, go to Dashboard (Input) and reset current progress
       reset();
     } else {
@@ -163,10 +179,10 @@ const AppContent: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className={`min-h-screen ${isDark ? 'dark bg-slate-950' : 'bg-slate-50'} flex flex-col`}>
+      <div className={`min-h-screen ${isDark ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} flex flex-col font-sans transition-colors duration-300`}>
         {/* Header */}
-        <header className={`${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} border-b sticky top-0 z-50`}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <header className={`sticky top-0 z-50 backdrop-blur-xl border-b transition-all duration-300 ${isDark ? 'bg-slate-950/70 border-white/5' : 'bg-white/70 border-slate-200/50'}`}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div className="flex items-center gap-2 cursor-pointer" onClick={handleLogoClick}>
               <div className="bg-green-600 p-2 rounded-lg">
                 <Sprout className="text-white" size={24} />
@@ -179,6 +195,12 @@ const AppContent: React.FC = () => {
               <div className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'} hidden sm:block`}>
                 Powered by GA-RF Model & GenAI
               </div>
+              <button
+                onClick={() => setState(AppState.ABOUT_US)}
+                className={`text-sm font-medium transition-colors ${isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                About Us
+              </button>
               <button
                 onClick={toggleTheme}
                 className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-600'}`}
@@ -220,39 +242,33 @@ const AppContent: React.FC = () => {
                 </p>
               </div>
 
-              <div className="flex justify-center gap-4 mb-8 flex-wrap">
+              <div className="flex justify-center gap-3 mb-10 flex-wrap">
                 <button
                   onClick={() => setState(AppState.INPUT)}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${state === AppState.INPUT
-                      ? 'bg-green-600 text-white'
-                      : isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
-                    }`}
+                  className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all duration-300 shadow-sm border bg-gradient-to-r from-emerald-500 to-green-600 text-white border-transparent shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:-translate-y-0.5`}
                 >
                   Crop Prediction
                 </button>
                 <button
                   onClick={() => setState(AppState.YIELD_PREDICTION)}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${state === AppState.YIELD_PREDICTION
-                      ? 'bg-blue-600 text-white'
-                      : isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all duration-300 shadow-sm border ${
+                    isDark ? 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-700 hover:text-white backdrop-blur-md' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                 >
                   Yield Prediction
                 </button>
                 <button
                   onClick={() => setState(AppState.PRICE_PREDICTION)}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${state === AppState.PRICE_PREDICTION
-                      ? 'bg-purple-600 text-white'
-                      : isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all duration-300 shadow-sm border ${
+                    isDark ? 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-700 hover:text-white backdrop-blur-md' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                 >
                   Price Forecast
                 </button>
                 <button
                   onClick={() => setState(AppState.CROP_LOOKUP)}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${state === AppState.CROP_LOOKUP
-                      ? 'bg-emerald-600 text-white'
-                      : isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all duration-300 shadow-sm border ${
+                    isDark ? 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-700 hover:text-white backdrop-blur-md' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                 >
                   Crop Lookup
@@ -265,46 +281,61 @@ const AppContent: React.FC = () => {
 
           {state === AppState.YIELD_PREDICTION && (
             <div className="animate-fade-in-up">
-              <YieldPrediction />
-              <div className="mt-8 flex justify-center gap-4">
+              <div className="mb-6">
                 <button
                   onClick={() => setState(AppState.INPUT)}
-                  className={`px-6 py-2 rounded-lg font-semibold transition-colors ${isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  className={`flex items-center gap-2 px-6 py-2 rounded-lg font-semibold transition-colors ${isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
                     }`}
                 >
-                  ← Back to Crop Prediction
+                  <ArrowLeft size={18} /> Back to Crop Prediction
                 </button>
               </div>
+              <YieldPrediction />
             </div>
           )}
 
           {state === AppState.PRICE_PREDICTION && (
             <div className="animate-fade-in-up">
-              <PricePrediction />
-              <div className="mt-8 flex justify-center gap-4">
+              <div className="mb-6">
                 <button
                   onClick={() => setState(AppState.INPUT)}
-                  className={`px-6 py-2 rounded-lg font-semibold transition-colors ${isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  className={`flex items-center gap-2 px-6 py-2 rounded-lg font-semibold transition-colors ${isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
                     }`}
                 >
-                  ← Back to Crop Prediction
+                  <ArrowLeft size={18} /> Back to Crop Prediction
                 </button>
               </div>
+              <PricePrediction />
             </div>
           )}
 
           {state === AppState.CROP_LOOKUP && (
             <div className="animate-fade-in-up">
-              <div className="mb-8 flex justify-center gap-4">
+              <div className="mb-6">
                 <button
                   onClick={() => setState(AppState.INPUT)}
-                  className={`px-6 py-2 rounded-lg font-semibold transition-colors ${isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  className={`flex items-center gap-2 px-6 py-2 rounded-lg font-semibold transition-colors ${isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
                     }`}
                 >
-                  ← Back to Crop Prediction
+                  <ArrowLeft size={18} /> Back to Crop Prediction
                 </button>
               </div>
               <CropLookup />
+            </div>
+          )}
+
+          {state === AppState.ABOUT_US && (
+            <div className="animate-fade-in-up">
+              <div className="mb-6">
+                <button
+                  onClick={() => setState(AppState.INPUT)}
+                  className={`flex items-center gap-2 px-6 py-2 rounded-lg font-semibold transition-colors ${isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                    }`}
+                >
+                  <ArrowLeft size={18} /> Back to Dashboard
+                </button>
+              </div>
+              <AboutUs />
             </div>
           )}
 
@@ -321,32 +352,31 @@ const AppContent: React.FC = () => {
 
           {state === AppState.RESULT && prediction && (
             <div className="animate-fade-in space-y-8">
-              {/* Top Result Bar */}
-              <div className="bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-2xl shadow-xl p-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-10 opacity-10">
-                  <Sprout size={200} />
+              <div className="mb-2">
+                <button
+                  onClick={reset}
+                  className={`flex items-center gap-2 px-6 py-2 rounded-lg font-semibold transition-colors ${isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                    }`}
+                >
+                  <ArrowLeft size={18} /> Back to Inputs
+                </button>
+              </div>
+              {/* Top Result Banner */}
+              <div className={`relative overflow-hidden rounded-3xl shadow-[0_8px_40px_-12px_rgba(16,185,129,0.3)] p-8 md:p-12 text-white bg-gradient-to-br transition-all duration-500 hover:shadow-[0_8px_40px_-12px_rgba(16,185,129,0.5)] ${isDark ? 'from-slate-900 via-emerald-950 to-slate-900 border border-white/10' : 'from-emerald-600 via-green-500 to-teal-600 border border-green-400'}`}>
+                {/* Decorative Background Elements */}
+                <div className="absolute top-0 right-0 p-10 opacity-10 blur-sm mix-blend-overlay pointer-events-none transform translate-x-1/4 -translate-y-1/4 scale-150">
+                  <Sprout size={400} />
                 </div>
-                <div className="relative z-10">
-                  <button onClick={reset} className="flex items-center gap-2 text-slate-300 hover:text-white mb-6 transition-colors">
-                    <ArrowLeft size={16} /> Back to inputs
-                  </button>
-                  <div className="flex flex-col md:flex-row items-start md:items-end gap-6">
-                    <div>
-                      <p className="text-green-400 font-medium mb-1 tracking-wide uppercase text-sm">Recommended Crop</p>
-                      <h2 className="text-5xl font-extrabold text-white mb-2">{prediction.crop}</h2>
-                      <div className="flex items-center gap-2 text-slate-300">
-                        <CheckCircle2 size={18} className="text-green-400" />
-                        <span>{(prediction.confidence * 100).toFixed(1)}% Confidence Score</span>
-                      </div>
+                <div className="absolute inset-0 bg-white/5 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent pointer-events-none"></div>
+
+                <div className="relative z-10 flex flex-col md:flex-row items-center md:items-end justify-between gap-8 h-full">
+                  <div className="text-center md:text-left w-full flex flex-col items-center">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-4 text-emerald-100 uppercase tracking-widest text-xs font-bold">
+                       <CheckCircle2 size={14} /> Top Recommendation
                     </div>
-                    <div className="flex-grow"></div>
-                    <div className="flex gap-4">
-                      {prediction.probabilities.slice(1, 3).map((p, idx) => (
-                        <div key={idx} className="text-right">
-                          <p className="text-xs text-slate-400 uppercase">Alternative</p>
-                          <p className="font-semibold text-slate-200">{p.name} ({(p.value * 100).toFixed(0)}%)</p>
-                        </div>
-                      ))}
+                    <h2 className="text-6xl md:text-7xl font-black text-white mb-2 tracking-tighter filter drop-shadow-md">{prediction.crop}</h2>
+                    <div className="flex items-center justify-center gap-2 text-emerald-50 text-lg font-medium opacity-90">
+                      <span>{(prediction.confidence * 100).toFixed(1)}% Artificial Intelligence Confidence</span>
                     </div>
                   </div>
                 </div>

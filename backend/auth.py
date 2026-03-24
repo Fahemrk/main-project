@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from models import db, User
+from backend.models import db, User, PredictionHistory
 import logging
 import re
 from datetime import datetime
@@ -148,8 +148,8 @@ def get_prediction_history():
         limit = request.args.get('limit', default=20, type=int)
         offset = request.args.get('offset', default=0, type=int)
 
-        predictions = user.predictions.order_by(
-            db.desc('created_at')
+        predictions = PredictionHistory.query.filter_by(user_id=user.id).order_by(
+            PredictionHistory.created_at.desc()
         ).limit(limit).offset(offset).all()
 
         return jsonify({

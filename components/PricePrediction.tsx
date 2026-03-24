@@ -48,8 +48,8 @@ const PricePrediction: React.FC = () => {
     };
 
     return (
-        <div className={`max-w-4xl mx-auto rounded-2xl shadow-xl overflow-hidden ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
-            <div className={`p-8 border-b ${isDark ? 'border-slate-700' : 'border-slate-100'}`}>
+        <div className={`max-w-5xl mx-auto rounded-3xl shadow-sm border backdrop-blur-xl overflow-hidden transition-all duration-300 hover:shadow-xl ${isDark ? 'bg-slate-800/40 border-white/5' : 'bg-white/60 border-slate-200/50'}`}>
+            <div className={`p-8 md:p-10 border-b ${isDark ? 'border-slate-700/50' : 'border-slate-200/50'}`}>
                 <div className="flex items-center gap-3 mb-2">
                     <div className="bg-purple-600 p-2 rounded-lg">
                         <TrendingUp className="text-white" size={24} />
@@ -76,7 +76,7 @@ const PricePrediction: React.FC = () => {
                                 <input
                                     type="number"
                                     min="1"
-                                    max="30"
+                                    max="60"
                                     value={days}
                                     onChange={(e) => {
                                         const val = e.target.value;
@@ -93,18 +93,20 @@ const PricePrediction: React.FC = () => {
                                 />
                             </div>
                             <p className={`mt-2 text-xs ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
-                                Values between 1-30 days give the most accurate results.
+                                Values between 1-60 days give the most accurate results.
                             </p>
                         </div>
 
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`w-full py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all ${loading
-                                ? 'bg-purple-800 cursor-not-allowed opacity-70'
-                                : 'bg-purple-600 hover:bg-purple-700 shadow-lg hover:shadow-purple-500/25'
+                            className={`group relative w-full py-4 rounded-full font-bold text-white flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 ${loading
+                                ? 'bg-slate-500 cursor-not-allowed shadow-none'
+                                : 'bg-gradient-to-r from-purple-500 to-fuchsia-600 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(168,85,247,0.5)] active:scale-95'
                                 }`}
                         >
+                            {!loading && <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>}
+                            <span className="relative z-10 flex items-center justify-center gap-2 w-full h-full">
                             {loading ? (
                                 <>
                                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -115,6 +117,7 @@ const PricePrediction: React.FC = () => {
                                     Analyze Market <ArrowRight size={20} />
                                 </>
                             )}
+                            </span>
                         </button>
                     </form>
 
@@ -127,7 +130,7 @@ const PricePrediction: React.FC = () => {
                 </div>
 
                 {/* Results Section */}
-                <div className={`rounded-xl p-8 flex flex-col justify-center items-center text-center ${isDark ? 'bg-slate-900' : 'bg-slate-50 border border-slate-100'
+                <div className={`rounded-3xl p-8 flex flex-col justify-center items-center text-center shadow-inner ${isDark ? 'bg-slate-900/50' : 'bg-slate-50 border border-slate-100'
                     }`}>
                     {!result ? (
                         <div className="opacity-50">

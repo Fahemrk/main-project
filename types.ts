@@ -29,7 +29,8 @@ export enum AppState {
   RESULT,
   YIELD_PREDICTION,
   CROP_LOOKUP,
-  PRICE_PREDICTION
+  PRICE_PREDICTION,
+  ABOUT_US
 }
 
 export interface CultivationGuide {

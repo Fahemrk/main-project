@@ -201,10 +201,10 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
     const hasError = !!error;
 
     return (
-    <div className={`group p-5 rounded-2xl shadow-md border-2 transition-all duration-300 ${
+    <div className={`group p-6 rounded-3xl shadow-sm border transition-all duration-300 backdrop-blur-xl ${
       hasError 
-        ? `border-red-400 ${isDark ? 'bg-red-950' : 'bg-red-50'}` 
-        : `${isDark ? 'bg-slate-800 border-slate-700 hover:border-green-500' : 'bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 hover:shadow-lg hover:border-green-300'}`
+        ? `border-red-400/50 ${isDark ? 'bg-red-950/20' : 'bg-red-50/50'}` 
+        : `${isDark ? 'bg-slate-800/40 border-white/5 hover:bg-slate-800/60 hover:border-emerald-500/30' : 'bg-white/60 border-slate-200/50 hover:bg-white hover:shadow-xl hover:border-emerald-300/50'} hover:-translate-y-1`
     }`}>
       <div className="flex items-center gap-2 mb-3">
         <div className={`p-2 rounded-lg group-hover:scale-110 transition-transform ${
@@ -225,10 +225,10 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
           name={name}
           value={formData[name as keyof SoilData]}
           onChange={handleChange}
-          className={`flex-1 border-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400 focus:border-transparent focus:outline-none font-bold text-lg transition-colors ${
+          className={`flex-1 border rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500/50 focus:border-transparent focus:outline-none font-bold text-lg transition-all shadow-inner ${
             isDark 
-              ? 'bg-slate-700 border-slate-600 text-slate-100 hover:border-green-400' 
-              : 'bg-white border-slate-200 text-slate-800 hover:border-green-300'
+              ? 'bg-slate-900/50 border-slate-700 focus:bg-slate-800 text-slate-100' 
+              : 'bg-slate-50 border-slate-200 focus:bg-white text-slate-800'
           }`}
           min={min}
           max={max}
@@ -284,10 +284,10 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
       )}
       
       {/* Location Section */}
-      <div className={`p-8 rounded-3xl shadow-lg border-2 mb-10 ${
+      <div className={`p-8 md:p-10 rounded-3xl shadow-sm border transition-all duration-300 backdrop-blur-xl mb-12 ${
         isDark 
-          ? 'bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700' 
-          : 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200'
+          ? 'bg-slate-800/40 border-white/5' 
+          : 'bg-white/60 border-slate-200/50 hover:shadow-xl'
       }`}>
         <div className="flex items-center gap-3 mb-6">
           <div className="p-3 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl">
@@ -410,19 +410,21 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
           type="submit"
           disabled={isLoading}
           className={`
-            px-10 py-4 rounded-2xl text-white font-bold text-lg shadow-2xl transform transition-all duration-300 border-2
+            group relative px-12 py-5 rounded-full text-white font-bold text-lg shadow-xl overflow-hidden transition-all duration-300 
             ${isLoading 
-              ? 'bg-slate-400 cursor-not-allowed border-slate-500 shadow-slate-400/50' 
-              : 'bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 hover:scale-110 hover:shadow-green-500/50 border-green-600 hover:from-green-600 hover:via-emerald-600 hover:to-teal-600 active:scale-95'}
+              ? 'bg-slate-500 cursor-not-allowed shadow-none' 
+              : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(16,185,129,0.5)] active:scale-95'}
           `}
         >
+          {!isLoading && <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>}
+          <span className="relative z-10 flex items-center justify-center gap-2 w-full h-full">
           {isLoading ? (
             <span className="flex items-center gap-3">
               <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <span>Analyzing with GA-RF...</span>
+              <span>Analyzing with AI...</span>
             </span>
           ) : (
             <span className="flex items-center gap-2">
@@ -430,6 +432,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
               Predict Optimal Crop
             </span>
           )}
+          </span>
         </button>
       </div>
     </form>

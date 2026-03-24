@@ -6,9 +6,16 @@ import joblib
 import os
 import logging
 import json
-from models import db, User, PredictionHistory
-from auth import auth_bp
+import sys
 
+# Ensure backend acts as a proper package when run directly
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+    
+from backend.models import db, User, PredictionHistory
+from backend.auth import auth_bp
 try:
     import numpy as np
     from sklearn.tree import DecisionTreeClassifier
@@ -51,7 +58,7 @@ jwt = JWTManager(app)
 
 app.register_blueprint(auth_bp)
 
-from price_prediction import price_bp
+from backend.price_prediction import price_bp
 app.register_blueprint(price_bp)
 
 @app.before_request
@@ -117,13 +124,13 @@ if not ML_PACKAGES_AVAILABLE:
     logger.warning("  Install with: pip install numpy scikit-learn shap lime joblib")
 else:
     try:
-        model = joblib.load('crop_model_optimized.joblib')
+        model = joblib.load(os.path.join(current_dir, 'crop_model_optimized.joblib'))
         logger.info("✓ Model loaded successfully: crop_model_optimized.joblib")
     except FileNotFoundError:
         logger.error("✗ Model file not found: crop_model_optimized.joblib")
         logger.error("   Using original model as fallback...")
         try:
-            model = joblib.load('crop_model.joblib')
+            model = joblib.load(os.path.join(current_dir, 'crop_model.joblib'))
             logger.info("✓ Fallback model loaded successfully: crop_model.joblib")
         except FileNotFoundError:
             logger.error("✗ Fallback model also not found.")
@@ -131,7 +138,7 @@ else:
         logger.error(f"✗ Failed to load model: {type(e).__name__}: {str(e)}")
 
     try:
-        le = joblib.load('label_encoder.joblib')
+        le = joblib.load(os.path.join(current_dir, 'label_encoder.joblib'))
         logger.info("✓ Label encoder loaded successfully: label_encoder.joblib")
         MODEL_LOADED = True
     except FileNotFoundError:
@@ -146,7 +153,7 @@ else:
         logger.info("✓ All required model files loaded. Ready to accept predictions.")
         try:
             import pandas as pd
-            df = pd.read_csv('Crop_recommendation.csv')
+            df = pd.read_csv(os.path.join(current_dir, 'Crop_recommendation.csv'))
             training_data = df.drop("label", axis=1).values
             shap_explainer = shap.TreeExplainer(model)
             logger.info("✓ SHAP TreeExplainer initialized successfully")
@@ -165,7 +172,7 @@ else:
             logger.warning("  Falling back to approximation methods if explainers unavailable")
         
         try:
-            with open('ga_features.json', 'r') as f:
+            with open(os.path.join(current_dir, 'ga_features.json'), 'r') as f:
                 ga_data = json.load(f)
                 ga_features = {item['crop']: item for item in ga_data}
                 logger.info(f"✓ GA feature selection loaded for {len(ga_features)} crops")
@@ -453,15 +460,23 @@ def predict_yield():
             return jsonify({'error': f'Missing fields: {", ".join(missing)}'}), 400
         
         try:
-            yield_model = joblib.load('models/yield_model_xgboost.pkl')
-            scaler = joblib.load('models/scaler.pkl')
-            crop_encoder = joblib.load('models/crop_encoder.pkl')
-            season_encoder = joblib.load('models/season_encoder.pkl')
-            state_encoder = joblib.load('models/state_encoder.pkl')
-            logger.info("Yield model and encoders loaded successfully")
+            # We enforce using the best performing model: XGBoost
+            yield_model_path = os.path.join(current_dir, 'models', 'yield_model_xgboost.pkl')
+            
+            if not os.path.exists(yield_model_path):
+                raise FileNotFoundError(f"Optimized XGBoost model not found at {yield_model_path}")
+                
+            yield_model = joblib.load(yield_model_path)
+            logger.info("XGBoost yield model loaded successfully")
+                
+            scaler = joblib.load(os.path.join(current_dir, 'models', 'scaler.pkl'))
+            crop_encoder = joblib.load(os.path.join(current_dir, 'models', 'crop_encoder.pkl'))
+            season_encoder = joblib.load(os.path.join(current_dir, 'models', 'season_encoder.pkl'))
+            state_encoder = joblib.load(os.path.join(current_dir, 'models', 'state_encoder.pkl'))
+            logger.info("Yield model encoders loaded successfully")
         except FileNotFoundError as e:
             logger.error(f"Model files not found: {str(e)}")
-            return jsonify({'error': f'Yield model not trained yet. Please run training pipeline first.'}), 503
+            return jsonify({'error': f'Yield model not trained yet. Please run XGBoost training pipeline first.'}), 503
         except Exception as e:
             logger.error(f"Failed to load yield model: {str(e)}")
             return jsonify({'error': f'Failed to load yield model: {str(e)}'}), 500
@@ -494,18 +509,28 @@ def predict_yield():
         
         predicted_yield = float(yield_model.predict(features_final)[0])
         
-        feature_importance = yield_model.feature_importances_
+        # Extract feature importance safely depending on the model type
+        feature_importance = None
+        if hasattr(yield_model, 'get_feature_importance'):
+            feature_importance = yield_model.get_feature_importance()
+        elif hasattr(yield_model, 'feature_importances_'):
+            feature_importance = yield_model.feature_importances_
         feature_names = ['rainfall', 'fertilizer', 'pesticide', 'area', 'crop', 'season', 'state', 'year']
         
-        importance_list = [
-            {
-                'feature': feature_names[i],
-                'importance': float(importance),
-                'percentage': float((importance / feature_importance.sum()) * 100)
-            }
-            for i, importance in enumerate(feature_importance)
-        ]
-        importance_list.sort(key=lambda x: x['importance'], reverse=True)
+        importance_list = []
+        if feature_importance is not None:
+            # sum() can be 0 if the model is broken, avoid division by zero
+            fi_sum = feature_importance.sum()
+            if fi_sum > 0:
+                importance_list = [
+                    {
+                        'feature': feature_names[i],
+                        'importance': float(importance),
+                        'percentage': float((importance / fi_sum) * 100)
+                    }
+                    for i, importance in enumerate(feature_importance)
+                ]
+                importance_list.sort(key=lambda x: x['importance'], reverse=True)
         
         confidence = 0.85
         if hasattr(yield_model, 'score'):
@@ -579,7 +604,7 @@ def get_crop_optimal_conditions(crop):
             return jsonify({'error': f'Crop not found: {crop}'}), 404
         
         import pandas as pd
-        df = pd.read_csv('Crop_recommendation.csv')
+        df = pd.read_csv(os.path.join(current_dir, 'Crop_recommendation.csv'))
         crop_data = df[df['label'].str.lower() == crop_lower]
         
         if crop_data.empty:

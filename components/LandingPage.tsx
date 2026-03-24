@@ -2,6 +2,7 @@
 import React from 'react';
 import { Sprout, BrainCircuit, LineChart, ArrowRight, Leaf, ShieldCheck, Zap } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
+import AboutUs from './AboutUs';
 
 interface LandingPageProps {
   onLogin: () => void;
@@ -25,9 +26,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onRegister }) => {
             </span>
           </div>
           <div className="flex items-center gap-4">
+            <a 
+              href="#about-us"
+              className={`text-sm font-medium px-4 py-2 transition-colors ${isDark ? 'text-slate-400 hover:text-slate-100' : 'text-slate-600 hover:text-slate-900'}`}
+            >
+              About
+            </a>
             <button 
               onClick={onLogin}
-              className={`font-medium px-4 py-2 transition-colors ${isDark ? 'text-slate-400 hover:text-slate-100' : 'text-slate-600 hover:text-slate-900'}`}
+              className={`text-sm font-medium px-4 py-2 transition-colors ${isDark ? 'text-slate-400 hover:text-slate-100' : 'text-slate-600 hover:text-slate-900'}`}
             >
               Sign In
             </button>
@@ -43,36 +50,40 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onRegister }) => {
 
       {/* Hero Section */}
       <div className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-        {/* Abstract Background Shapes */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[600px] h-[600px] bg-green-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[500px] h-[500px] bg-blue-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+        {/* Abstract Animated Background Shapes */}
+        <div className={`absolute top-0 right-0 -mr-20 -mt-20 w-[600px] h-[600px] rounded-full blur-[100px] opacity-60 animate-float pointer-events-none ${isDark ? 'bg-emerald-900/30' : 'bg-green-100'}`}></div>
+        <div className={`absolute bottom-0 left-0 -ml-20 -mb-20 w-[500px] h-[500px] rounded-full blur-[100px] opacity-60 animate-float-delayed pointer-events-none ${isDark ? 'bg-blue-900/20' : 'bg-blue-100'}`}></div>
+        <div className={`absolute top-1/2 left-1/2 -ml-64 w-[400px] h-[400px] rounded-full blur-[100px] opacity-40 animate-pulse-slow pointer-events-none ${isDark ? 'bg-purple-900/20' : 'bg-purple-100'}`}></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm mb-6 ${isDark ? 'bg-slate-800 border border-slate-700 text-green-400' : 'bg-green-50 border border-green-100 text-green-700'}`}>
-                <Zap size={16} fill="currentColor" /> Powered by Genetic Algorithms & Advanced AI
+            <div className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-sm mb-8 shadow-sm backdrop-blur-md border animate-fade-in-up ${isDark ? 'bg-slate-800/80 border-slate-700 text-emerald-400' : 'bg-white/80 border-green-100 text-green-700'}`}>
+                <Zap size={16} fill="currentColor" className={isDark ? "text-emerald-400" : "text-amber-400"} /> 
+                <span className="tracking-wide uppercase text-xs">Powered by Genetic Algorithms & Advanced AI</span>
             </div>
-            <h1 className={`text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-tight ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
+            <h1 className={`text-6xl md:text-8xl font-black tracking-tighter mb-8 leading-[1.1] animate-fade-in-up ${isDark ? 'text-white' : 'text-slate-900'}`} style={{ animationDelay: '0.1s' }}>
               Farming Intelligence <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500">
-                Reimagined for You.
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-green-500 to-teal-400 animate-gradient-x">
+                Reimagined.
               </span>
             </h1>
-            <p className={`text-xl mb-10 max-w-2xl mx-auto leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-              Stop guessing. Start growing. Our hybrid ML model predicts the perfect crop for your soil, while AI generates your step-by-step cultivation roadmap.
+            <p className={`text-xl md:text-2xl mb-12 max-w-3xl mx-auto leading-relaxed font-light animate-fade-in-up ${isDark ? 'text-slate-300' : 'text-slate-600'}`} style={{ animationDelay: '0.2s' }}>
+              Stop guessing. Start growing. Our hybrid ML model predicts the perfect crop for your land, while GenAI creates your step-by-step cultivation roadmap.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
               <button 
                 onClick={onRegister}
-                className="w-full sm:w-auto px-8 py-4 bg-green-600 text-white rounded-full font-bold text-lg hover:bg-green-700 hover:scale-105 transition-all shadow-xl shadow-green-200 flex items-center justify-center gap-2"
+                className="group relative w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-full font-bold text-lg hover:from-emerald-400 hover:to-green-500 transition-all duration-300 hover:-translate-y-1 shadow-[0_0_40px_rgba(16,185,129,0.4)] flex items-center justify-center gap-3 overflow-hidden"
               >
-                Start Predicting Now <ArrowRight size={20} />
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
+                <span className="relative z-10">Start Predicting Now</span> 
+                <ArrowRight size={22} className="relative z-10 group-hover:translate-x-1 transition-transform" />
               </button>
               <button 
                 onClick={onLogin}
-                className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-bold text-lg hover:bg-slate-50 transition-all flex items-center justify-center"
+                className={`w-full sm:w-auto px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 hover:-translate-y-1 flex items-center justify-center backdrop-blur-md border ${isDark ? 'bg-slate-800/50 text-white border-slate-700 hover:bg-slate-800 shadow-[0_4px_20px_rgba(0,0,0,0.3)]' : 'bg-white/80 text-slate-800 border-slate-200 hover:bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)]'}`}
               >
-                Existing User?
+                Sign In to Account
               </button>
             </div>
           </div>
@@ -135,11 +146,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onRegister }) => {
                   "Our approach integrates Genetic Algorithms and Machine Learning to achieve a remarkable accuracy rate of 99.3% in crop prediction."
               </blockquote>
               <div className={`flex items-center justify-center gap-4 text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>
-                  <div className={`w-10 h-10 rounded-full overflow-hidden ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`}>
+                  <div className={`w-12 h-12 rounded-full overflow-hidden border-2 flex items-center justify-center ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
                       {/* Avatar Placeholder */}
-                      <svg className={`w-full h-full ${isDark ? 'text-slate-500' : 'text-slate-400'}`} fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
+                      <span className="text-xl">👨‍🔬</span>
                   </div>
                   <div>
                       Tanjim Mahmud et al. <br />
@@ -147,6 +156,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onRegister }) => {
                   </div>
               </div>
           </div>
+      </div>
+
+      {/* About Us Section */}
+      <div className={`py-24 border-t ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`} id="about-us">
+        <AboutUs />
       </div>
 
       {/* Footer */}

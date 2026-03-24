@@ -1,0 +1,8 @@
+{
+  "n_estimators": 145,
+  "max_depth": 45,
+  "min_samples_split": 9,
+  "min_samples_leaf": 1,
+  "max_features": 2,
+  "best_cv_accuracy": 0.9954542195037338
+}

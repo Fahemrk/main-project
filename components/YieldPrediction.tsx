@@ -141,299 +141,179 @@ const YieldPrediction: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit} className={`rounded-xl shadow-lg border-2 p-6 ${
-              isDark
-                ? 'bg-slate-800 border-slate-700'
-                : 'bg-white border-blue-200'
-            }`}>
-              <h2 className={`text-xl font-bold mb-6 ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
-                Input Parameters
-              </h2>
+        <div className="space-y-8">
+          {/* Form Section */}
+          <form onSubmit={handleSubmit} className={`relative rounded-3xl shadow-sm border p-8 md:p-10 backdrop-blur-xl transition-all duration-300 overflow-hidden ${
+            isDark
+              ? 'bg-slate-800/40 border-white/5'
+              : 'bg-white/60 border-slate-200/50 hover:shadow-xl'
+          }`}>
+            <h2 className={`text-2xl font-bold mb-8 flex items-center gap-3 ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
+               <div className="p-2 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg text-white">
+                 <AlertCircle size={20} />
+               </div>
+               Crop Details & Area Parameters
+            </h2>
 
-              <div className="space-y-4">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className={`group p-6 rounded-3xl shadow-sm border transition-all duration-300 backdrop-blur-xl hover:-translate-y-1 ${isDark ? 'bg-slate-800/40 border-white/5 hover:bg-slate-800/60' : 'bg-white/60 border-slate-200/50 hover:bg-white hover:shadow-xl'}`}>
+                <label className={`block text-sm font-semibold mb-3 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Crop Name</label>
+                <select name="crop" value={formData.crop} onChange={handleChange} className={`w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-transparent focus:outline-none font-bold text-base transition-all shadow-inner ${isDark ? 'bg-slate-900/50 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'}`}>
+                  {CROPS.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+
+              <div className={`group p-6 rounded-3xl shadow-sm border transition-all duration-300 backdrop-blur-xl hover:-translate-y-1 ${isDark ? 'bg-slate-800/40 border-white/5 hover:bg-slate-800/60' : 'bg-white/60 border-slate-200/50 hover:bg-white hover:shadow-xl'}`}>
+                <label className={`block text-sm font-semibold mb-3 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Season</label>
+                <select name="season" value={formData.season} onChange={handleChange} className={`w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-transparent focus:outline-none font-bold text-base transition-all shadow-inner ${isDark ? 'bg-slate-900/50 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'}`}>
+                  {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+
+              <div className={`group p-6 rounded-3xl shadow-sm border transition-all duration-300 backdrop-blur-xl hover:-translate-y-1 ${isDark ? 'bg-slate-800/40 border-white/5 hover:bg-slate-800/60' : 'bg-white/60 border-slate-200/50 hover:bg-white hover:shadow-xl'}`}>
+                <label className={`block text-sm font-semibold mb-3 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>State</label>
+                <select name="state" value={formData.state} onChange={handleChange} className={`w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-transparent focus:outline-none font-bold text-base transition-all shadow-inner ${isDark ? 'bg-slate-900/50 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'}`}>
+                  {STATES.map(st => <option key={st} value={st}>{st}</option>)}
+                </select>
+              </div>
+
+              <div className={`group p-6 rounded-3xl shadow-sm border transition-all duration-300 backdrop-blur-xl hover:-translate-y-1 ${isDark ? 'bg-slate-800/40 border-white/5 hover:bg-slate-800/60' : 'bg-white/60 border-slate-200/50 hover:bg-white hover:shadow-xl'}`}>
+                <label className={`block text-sm font-semibold mb-3 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Area (acres)</label>
+                <input type="number" name="area" value={formData.area} onChange={handleChange} min="0" step="any" className={`w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-transparent focus:outline-none font-bold text-base transition-all shadow-inner ${isDark ? 'bg-slate-900/50 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'}`} />
+              </div>
+            </div>
+
+            <h2 className={`text-2xl font-bold mb-8 mt-12 flex items-center gap-3 ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
+               <div className="p-2 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-lg text-white">
+                 <AlertCircle size={20} />
+               </div>
+               Growth Variables
+            </h2>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className={`group p-6 rounded-3xl shadow-sm border transition-all duration-300 backdrop-blur-xl hover:-translate-y-1 ${isDark ? 'bg-slate-800/40 border-white/5 hover:bg-slate-800/60' : 'bg-white/60 border-slate-200/50 hover:bg-white hover:shadow-xl'}`}>
+                <label className={`block text-sm font-semibold mb-3 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Annual Rainfall (mm)</label>
+                <input type="number" name="rainfall" value={formData.rainfall} onChange={handleChange} min="0" step="any" className={`w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-transparent focus:outline-none font-bold text-base transition-all shadow-inner ${isDark ? 'bg-slate-900/50 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'}`} />
+              </div>
+              
+              <div className={`group p-6 rounded-3xl shadow-sm border transition-all duration-300 backdrop-blur-xl hover:-translate-y-1 ${isDark ? 'bg-slate-800/40 border-white/5 hover:bg-slate-800/60' : 'bg-white/60 border-slate-200/50 hover:bg-white hover:shadow-xl'}`}>
+                <label className={`block text-sm font-semibold mb-3 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Fertilizer Used (kg)</label>
+                <input type="number" name="fertilizer" value={formData.fertilizer} onChange={handleChange} min="0" step="any" className={`w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-transparent focus:outline-none font-bold text-base transition-all shadow-inner ${isDark ? 'bg-slate-900/50 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'}`} />
+              </div>
+
+              <div className={`group p-6 rounded-3xl shadow-sm border transition-all duration-300 backdrop-blur-xl hover:-translate-y-1 ${isDark ? 'bg-slate-800/40 border-white/5 hover:bg-slate-800/60' : 'bg-white/60 border-slate-200/50 hover:bg-white hover:shadow-xl'}`}>
+                <label className={`block text-sm font-semibold mb-3 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Pesticide Used (kg)</label>
+                <input type="number" name="pesticide" value={formData.pesticide} onChange={handleChange} min="0" step="any" className={`w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-transparent focus:outline-none font-bold text-base transition-all shadow-inner ${isDark ? 'bg-slate-900/50 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'}`} />
+              </div>
+
+              <div className={`group p-6 rounded-3xl shadow-sm border transition-all duration-300 backdrop-blur-xl hover:-translate-y-1 ${isDark ? 'bg-slate-800/40 border-white/5 hover:bg-slate-800/60' : 'bg-white/60 border-slate-200/50 hover:bg-white hover:shadow-xl'}`}>
+                <label className={`block text-sm font-semibold mb-3 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Year</label>
+                <input type="number" name="year" value={formData.year} onChange={handleChange} min="2020" max="2030" className={`w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-transparent focus:outline-none font-bold text-base transition-all shadow-inner ${isDark ? 'bg-slate-900/50 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'}`} />
+              </div>
+            </div>
+
+            {error && (
+              <div className={`flex gap-3 p-4 rounded-xl border mt-6 backdrop-blur-md ${isDark ? 'bg-red-950/40 border-red-500/50 text-red-300' : 'bg-red-50/80 border-red-200 text-red-600'}`}>
+                <AlertCircle size={20} className="shrink-0 mt-0.5" />
                 <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    Crop Name
-                  </label>
-                  <select
-                    name="crop"
-                    value={formData.crop}
-                    onChange={handleChange}
-                    className={`w-full border-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      isDark
-                        ? 'bg-slate-700 border-slate-600 text-slate-100'
-                        : 'bg-white border-blue-300 text-slate-800'
-                    }`}
-                  >
-                    {CROPS.map(crop => (
-                      <option key={crop} value={crop}>{crop}</option>
-                    ))}
-                  </select>
+                  <p className="font-semibold">Prediction Error</p>
+                  <p className="text-sm mt-1">{error}</p>
                 </div>
+              </div>
+            )}
 
-                <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    Season
-                  </label>
-                  <select
-                    name="season"
-                    value={formData.season}
-                    onChange={handleChange}
-                    className={`w-full border-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      isDark
-                        ? 'bg-slate-700 border-slate-600 text-slate-100'
-                        : 'bg-white border-blue-300 text-slate-800'
-                    }`}
-                  >
-                    {SEASONS.map(season => (
-                      <option key={season} value={season}>{season}</option>
-                    ))}
-                  </select>
-                </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`
+                group relative w-full lg:w-96 mx-auto block mt-10 px-6 py-5 rounded-full text-white font-bold text-xl shadow-xl overflow-hidden transition-all duration-300 
+                ${isLoading 
+                  ? 'bg-slate-500 cursor-not-allowed shadow-none' 
+                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(79,70,229,0.5)] active:scale-95'}
+              `}
+            >
+              {!isLoading && <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>}
+              <span className="relative z-10 flex items-center justify-center gap-2 w-full h-full">
+              {isLoading ? (
+                <>
+                  <Loader2 size={24} className="animate-spin" />
+                  Predicting...
+                </>
+              ) : (
+                <>
+                  <BarChart3 size={24} />
+                  Calculate Expected Yield
+                </>
+              )}
+              </span>
+            </button>
+          </form>
 
-                <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    State
-                  </label>
-                  <select
-                    name="state"
-                    value={formData.state}
-                    onChange={handleChange}
-                    className={`w-full border-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      isDark
-                        ? 'bg-slate-700 border-slate-600 text-slate-100'
-                        : 'bg-white border-blue-300 text-slate-800'
-                    }`}
-                  >
-                    {STATES.map(state => (
-                      <option key={state} value={state}>{state}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    Area (acres)
-                  </label>
-                  <input
-                    type="number"
-                    name="area"
-                    value={formData.area}
-                    onChange={handleChange}
-                    min="0"
-                    step="any"
-                    className={`w-full border-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      isDark
-                        ? 'bg-slate-700 border-slate-600 text-slate-100'
-                        : 'bg-white border-blue-300 text-slate-800'
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    Annual Rainfall (mm)
-                  </label>
-                  <input
-                    type="number"
-                    name="rainfall"
-                    value={formData.rainfall}
-                    onChange={handleChange}
-                    min="0"
-                    step="any"
-                    className={`w-full border-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      isDark
-                        ? 'bg-slate-700 border-slate-600 text-slate-100'
-                        : 'bg-white border-blue-300 text-slate-800'
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    Fertilizer Used (in kg)
-                  </label>
-                  <input
-                    type="number"
-                    name="fertilizer"
-                    value={formData.fertilizer}
-                    onChange={handleChange}
-                    min="0"
-                    step="any"
-                    className={`w-full border-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      isDark
-                        ? 'bg-slate-700 border-slate-600 text-slate-100'
-                        : 'bg-white border-blue-300 text-slate-800'
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    Pesticide Used (in kg)
-                  </label>
-                  <input
-                    type="number"
-                    name="pesticide"
-                    value={formData.pesticide}
-                    onChange={handleChange}
-                    min="0"
-                    step="any"
-                    className={`w-full border-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      isDark
-                        ? 'bg-slate-700 border-slate-600 text-slate-100'
-                        : 'bg-white border-blue-300 text-slate-800'
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    Year
-                  </label>
-                  <input
-                    type="number"
-                    name="year"
-                    value={formData.year}
-                    onChange={handleChange}
-                    min="2020"
-                    max="2025"
-                    className={`w-full border-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      isDark
-                        ? 'bg-slate-700 border-slate-600 text-slate-100'
-                        : 'bg-white border-blue-300 text-slate-800'
-                    }`}
-                  />
+          {/* Results Section */}
+          {hasSubmitted && result && (
+            <div className="animate-fade-in-up mt-8">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl mb-8 group">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-800 transition-transform duration-700 group-hover:scale-105"></div>
+                <div className="absolute inset-0 bg-black/10"></div>
+                
+                <div className="relative z-10 p-8 md:p-12">
+                  <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-8 h-full">
+                    <div className="text-center md:text-left w-full flex flex-col items-center">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-6 text-blue-100 uppercase tracking-widest text-xs font-bold">
+                         <CheckCircle size={14} /> Expected Production
+                      </div>
+                      
+                      <div className="flex items-baseline justify-center gap-4 mb-2 filter drop-shadow-md">
+                        <h2 className="text-7xl md:text-8xl font-black text-white tracking-tighter">
+                          {(result.predicted_yield * 0.404686).toFixed(2)}
+                        </h2>
+                        <span className="text-2xl text-blue-100 font-medium">MT/acre</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-center gap-2 text-blue-50 text-lg font-medium opacity-90">
+                        <span>{(result.confidence * 100).toFixed(1)}% AI Model Confidence</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {error && (
-                <div className={`flex gap-3 p-4 rounded-lg border-l-4 border-red-500 mt-6 ${isDark ? 'bg-red-950' : 'bg-red-50'}`}>
-                  <AlertCircle className={`${isDark ? 'text-red-300' : 'text-red-600'}`} size={20} />
-                  <div>
-                    <p className={`font-semibold ${isDark ? 'text-red-300' : 'text-red-700'}`}>Error</p>
-                    <p className={`text-sm mt-1 ${isDark ? 'text-red-200' : 'text-red-600'}`}>{error}</p>
-                  </div>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full mt-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 px-6 py-3 rounded-lg font-semibold transition-all duration-300 border-2 border-blue-700 hover:shadow-lg hover:scale-105 disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 size={20} className="animate-spin" />
-                    Predicting...
-                  </>
-                ) : (
-                  <>
-                    <BarChart3 size={20} />
-                    Predict Yield
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-
-          {hasSubmitted && result && (
-            <div className="lg:col-span-3">
-              <div className={`rounded-xl shadow-lg border-2 p-6 ${
-                isDark
-                  ? 'bg-slate-800 border-slate-700'
-                  : 'bg-white border-blue-200'
-              }`}>
-                <div className="flex items-center gap-3 mb-6">
-                  <CheckCircle className="text-green-500" size={28} />
-                  <h2 className={`text-2xl font-bold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
-                    Prediction Results
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-2 gap-6 mb-8">
-                  <div className={`p-6 rounded-lg border-2 ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-green-50 to-green-100 border-green-300'}`}>
-                    <p className={`text-sm font-semibold uppercase mb-2 tracking-wide ${isDark ? 'text-green-400' : 'text-green-700'}`}>
-                      Predicted Yield
-                    </p>
-                    <p className={`text-4xl font-extrabold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
-                      {(result.predicted_yield * 0.404686).toFixed(2)}
-                    </p>
-                    <p className={`text-sm mt-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                      metric tons/acre
-                    </p>
-                  </div>
-
-                  <div className={`p-6 rounded-lg border-2 ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-300'}`}>
-                    <p className={`text-sm font-semibold uppercase mb-2 tracking-wide ${isDark ? 'text-blue-400' : 'text-blue-700'}`}>
-                      Model Confidence
-                    </p>
-                    <p className={`text-4xl font-extrabold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
-                      {(result.confidence * 100).toFixed(1)}%
-                    </p>
-                    <div className={`w-full bg-gray-300 rounded-full h-2 mt-3 ${isDark ? 'bg-slate-600' : ''}`}>
-                      <div
-                        className="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full"
-                        style={{ width: `${result.confidence * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={`rounded-lg p-6 border-2 mb-6 ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-slate-50 border-slate-200'}`}>
-                  <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
-                    Input Parameters Summary
+              {/* Analysis Grid */}
+              <div className="grid md:grid-cols-2 gap-6 pb-20">
+                <div className={`rounded-3xl shadow-sm border p-8 backdrop-blur-xl ${isDark ? 'bg-slate-800/40 border-white/5' : 'bg-white/60 border-slate-200/50'}`}>
+                  <h3 className={`text-xl font-bold flex items-center gap-2 mb-6 ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
+                    Input Parameters Evaluated
                   </h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Crop:</span>
-                      <p className={`font-semibold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>{result.crop}</p>
-                    </div>
-                    <div>
-                      <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Season:</span>
-                      <p className={`font-semibold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>{result.season}</p>
-                    </div>
-                    <div>
-                      <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>State:</span>
-                      <p className={`font-semibold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>{result.state}</p>
-                    </div>
-                    <div>
-                      <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Area:</span>
-                      <p className={`font-semibold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>{(result.area / 0.404686).toFixed(2)} acres</p>
-                    </div>
-                    <div>
-                      <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Rainfall:</span>
-                      <p className={`font-semibold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>{result.rainfall} mm</p>
-                    </div>
-                    <div>
-                      <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Fertilizer:</span>
-                      <p className={`font-semibold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>{result.fertilizer}</p>
-                    </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      { l: 'Crop', v: result.crop },
+                      { l: 'Season', v: result.season },
+                      { l: 'State', v: result.state },
+                      { l: 'Area', v: `${(result.area / 0.404686).toFixed(2)} acres` },
+                      { l: 'Rainfall', v: `${result.rainfall} mm` },
+                      { l: 'Fertilizer', v: `${result.fertilizer} kg` },
+                    ].map((item, i) => (
+                      <div key={i} className={`p-4 rounded-2xl ${isDark ? 'bg-slate-900/50' : 'bg-slate-50'}`}>
+                        <div className={`text-xs uppercase tracking-wider mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{item.l}</div>
+                        <div className={`font-bold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{item.v}</div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                <div>
-                  <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
-                    Top 5 Feature Importance
+                <div className={`rounded-3xl shadow-sm border p-8 backdrop-blur-xl ${isDark ? 'bg-slate-800/40 border-white/5' : 'bg-white/60 border-slate-200/50'}`}>
+                  <h3 className={`text-xl font-bold flex items-center gap-2 mb-6 ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
+                    Genetic Algorithm Feature Importance
                   </h3>
-                  <div className="space-y-3">
-                    {result.top_features.map((feature, index) => (
-                      <div key={index}>
-                        <div className="flex justify-between mb-1">
-                          <span className={`text-sm font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                            {feature.feature.charAt(0).toUpperCase() + feature.feature.slice(1)}
-                          </span>
-                          <span className={`text-sm font-bold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                            {feature.percentage.toFixed(1)}%
-                          </span>
+                  <div className="space-y-4">
+                    {result.top_features.map((feature, i) => (
+                      <div key={i}>
+                        <div className="flex justify-between text-sm font-medium mb-2">
+                          <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>{feature.feature.charAt(0).toUpperCase() + feature.feature.slice(1)}</span>
+                          <span className={isDark ? 'text-blue-400' : 'text-blue-600'}>{feature.percentage.toFixed(1)}%</span>
                         </div>
-                        <div className={`w-full bg-gray-300 rounded-full h-2.5 ${isDark ? 'bg-slate-600' : ''}`}>
-                          <div
-                            className="bg-gradient-to-r from-cyan-400 to-blue-600 h-2.5 rounded-full"
-                            style={{ width: `${feature.percentage}%` }}
-                          ></div>
+                        <div className={`w-full rounded-full h-2 ${isDark ? 'bg-slate-900' : 'bg-slate-200'}`}>
+                          <div className="bg-gradient-to-r from-blue-400 to-indigo-600 h-2 rounded-full" style={{ width: `${feature.percentage}%` }}></div>
                         </div>
                       </div>
                     ))}
