@@ -1,7 +1,7 @@
 {
-    "test_rmse": 1.564520375429056,
-    "test_mae": 1.2678971714649387,
-    "test_r2": 0.8920458263800473,
+    "test_rmse": 59.50312655913553,
+    "test_mae": 44.58483123779297,
+    "test_r2": 0.9164034128189087,
     "features": [
         "price_lag_1",
         "price_lag_7",
@@ -25,11 +25,11 @@
         "export_ban"
     ],
     "best_params": {
-        "subsample": 0.9,
+        "subsample": 0.7,
         "n_estimators": 2000,
         "min_child_weight": 5,
-        "max_depth": 3,
-        "learning_rate": 0.01,
+        "max_depth": 9,
+        "learning_rate": 0.1,
         "gamma": 0.1,
         "colsample_bytree": 0.7
     }

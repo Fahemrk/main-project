@@ -72,7 +72,7 @@ def test_predict_invalid_data(client, auth_token):
 def test_predict_yield_success(client, auth_token):
     headers = {'Authorization': f'Bearer {auth_token}'}
     response = client.post('/predict-yield', json={
-        'crop': 'rice',
+        'crop': 'Rice',
         'season': 'Kharif',
         'state': 'Punjab',
         'rainfall': 1000,

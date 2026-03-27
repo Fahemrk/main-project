@@ -1,7 +1,7 @@
 {
-    "test_rmse": 1.564520375429056,
-    "test_mae": 1.2678971714649387,
-    "test_r2": 0.8920458263800473,
+    "test_rmse": 1.02339624096204,
+    "test_mae": 0.7979330235142861,
+    "test_r2": 0.8140014842448112,
     "features": [
         "price_lag_1",
         "price_lag_7",
@@ -20,17 +20,23 @@
         "day_of_year",
         "rainfall_mm",
         "avg_temp_c",
+        "avg_humidity_pct",
+        "copra_price",
+        "coconut_oil_price",
+        "yield_index",
+        "pest_disease_index",
         "MSP",
         "diesel_price",
-        "export_ban"
+        "export_ban",
+        "flood_event"
     ],
     "best_params": {
-        "subsample": 0.9,
-        "n_estimators": 2000,
+        "subsample": 0.7,
+        "n_estimators": 1000,
         "min_child_weight": 5,
         "max_depth": 3,
-        "learning_rate": 0.01,
-        "gamma": 0.1,
-        "colsample_bytree": 0.7
+        "learning_rate": 0.1,
+        "gamma": 0.2,
+        "colsample_bytree": 0.9
     }
 }
