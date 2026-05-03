@@ -10,6 +10,7 @@ import PricePrediction from './components/PricePrediction';
 import XAICharts from './components/XAICharts';
 import CultivationGuide from './components/CultivationGuide';
 import AboutUs from './components/AboutUs';
+import PredictionHistory from './components/PredictionHistory';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import LandingPage from './components/LandingPage';
@@ -134,7 +135,8 @@ const AppContent: React.FC = () => {
       AppState.YIELD_PREDICTION,
       AppState.PRICE_PREDICTION,
       AppState.CROP_LOOKUP,
-      AppState.ABOUT_US
+      AppState.ABOUT_US,
+      AppState.HISTORY
     ].includes(state)) {
       // User is logged in, go to Dashboard (Input) and reset current progress
       reset();
@@ -195,6 +197,12 @@ const AppContent: React.FC = () => {
               <div className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'} hidden sm:block`}>
                 Powered by GA-RF Model & GenAI
               </div>
+              <button
+                onClick={() => setState(AppState.HISTORY)}
+                className={`text-sm font-medium transition-colors ${isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                History
+              </button>
               <button
                 onClick={() => setState(AppState.ABOUT_US)}
                 className={`text-sm font-medium transition-colors ${isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'}`}
@@ -273,6 +281,14 @@ const AppContent: React.FC = () => {
                 >
                   Crop Lookup
                 </button>
+                <button
+                  onClick={() => setState(AppState.HISTORY)}
+                  className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all duration-300 shadow-sm border ${
+                    isDark ? 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-700 hover:text-white backdrop-blur-md' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900'
+                    }`}
+                >
+                  My History
+                </button>
               </div>
 
               <InputForm onSubmit={handleFormSubmit} isLoading={false} />
@@ -336,6 +352,21 @@ const AppContent: React.FC = () => {
                 </button>
               </div>
               <AboutUs />
+            </div>
+          )}
+
+          {state === AppState.HISTORY && (
+            <div className="animate-fade-in-up">
+              <div className="mb-6">
+                <button
+                  onClick={() => setState(AppState.INPUT)}
+                  className={`flex items-center gap-2 px-6 py-2 rounded-lg font-semibold transition-colors ${isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                    }`}
+                >
+                  <ArrowLeft size={18} /> Back to Dashboard
+                </button>
+              </div>
+              <PredictionHistory />
             </div>
           )}
 
