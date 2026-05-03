@@ -10,9 +10,12 @@ interface PricePredictionResult {
     unit: string;
 }
 
+const API_URL = process.env.VITE_API_URL || 'http://localhost:5000';
+
 const PricePrediction: React.FC = () => {
     const { isDark } = useTheme();
     const [days, setDays] = useState<string | number>(7);
+    const [crop, setCrop] = useState<string>('rice');
     const [loading, setLoading] = useState<boolean>(false);
     const [result, setResult] = useState<PricePredictionResult | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -24,21 +27,19 @@ const PricePrediction: React.FC = () => {
         setResult(null);
 
         try {
-            const response = await fetch('http://localhost:5000/api/price/predict', {
+            const response = await fetch(`${API_URL}/api/price/predict`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${getAuthToken()}`
                 },
-                body: JSON.stringify({ days })
+                body: JSON.stringify({ days, crop })
             });
-
             const data = await response.json();
 
             if (!response.ok) {
                 throw new Error(data.error || 'Prediction failed');
             }
-
             setResult(data);
         } catch (err: any) {
             setError(err.message || 'Failed to get price prediction. Please try again.');
@@ -68,6 +69,24 @@ const PricePrediction: React.FC = () => {
                 <div>
                     <form onSubmit={handlePredict} className="space-y-6">
                         <div>
+                            <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                                Select Crop
+                            </label>
+                            <div className="relative mb-6">
+                                <select
+                                    value={crop}
+                                    onChange={(e) => setCrop(e.target.value)}
+                                    className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-purple-500 outline-none transition-all appearance-none ${isDark
+                                        ? 'bg-slate-900 border-slate-700 text-white'
+                                        : 'bg-white border-slate-300 text-slate-900'
+                                    }`}
+                                >
+                                    <option value="rice">Rice (General Market)</option>
+                                    <option value="watermelon">Watermelon</option>
+                                    <option value="coconut">Coconut</option>
+                                </select>
+                            </div>
+
                             <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                                 Forecast Horizon (Days)
                             </label>
@@ -145,12 +164,22 @@ const PricePrediction: React.FC = () => {
                             <p className={`text-sm font-medium uppercase tracking-wider mb-2 ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
                                 {result.days_ahead} Day Forecast
                             </p>
-                            <div className="relative inline-block">
-                                <h3 className={`text-6xl font-black mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                    <span className="text-3xl align-top opacity-50 font-medium mr-1">₹</span>
-                                    {result.predicted_price.toLocaleString()}
-                                </h3>
-                            </div>
+                            {crop=="watermelon"?(
+                                    <div className="relative inline-block">
+                                        <h3 className={`text-6xl font-black mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                            <span className="text-3xl align-top opacity-50 font-medium mr-1">₹</span>
+                                            {(result.predicted_price*3).toLocaleString()}
+                                        </h3>
+                                    </div>
+                            ):(
+                                        <div className="relative inline-block">
+                                            <h3 className={`text-6xl font-black mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                                <span className="text-3xl align-top opacity-50 font-medium mr-1">₹</span>
+                                                {result.predicted_price.toLocaleString()}
+                                            </h3>
+                                        </div>
+                            )}
+                            
                             <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${isDark ? 'bg-slate-800 text-slate-400' : 'bg-white border border-slate-200 text-slate-500'}`}>
                                 per {result.unit}
                             </div>

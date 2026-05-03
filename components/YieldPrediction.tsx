@@ -48,6 +48,8 @@ const CROPS = [
   'Rapeseed &Mustard', 'Rice', 'Sugarcane', 'Turmeric', 'Wheat'
 ];
 
+const API_URL = process.env.VITE_API_URL || 'http://localhost:5000';
+
 const YieldPrediction: React.FC = () => {
   const { isDark } = useTheme();
   const [formData, setFormData] = useState<YieldData>({
@@ -98,7 +100,7 @@ const YieldPrediction: React.FC = () => {
         year: Number(formData.year)
       };
 
-      const response = await fetch('http://localhost:5000/predict-yield', {
+      const response = await fetch(`${API_URL}/predict-yield`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -137,7 +139,7 @@ const YieldPrediction: React.FC = () => {
             </h1>
           </div>
           <p className={`text-lg ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-            Predict your crop yield using machine learning trained with Random Forest and Genetic Algorithm optimization
+            Predict your crop yield using XGBoost, optimized with a Genetic Algorithm for hyperparameter tuning
           </p>
         </div>
 

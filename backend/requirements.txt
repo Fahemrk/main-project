@@ -13,3 +13,5 @@ shap==0.44.0
 lime==0.2.0
 deap==1.4.1
 catboost
+xgboost
+gunicorn

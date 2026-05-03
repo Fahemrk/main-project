@@ -123,7 +123,7 @@ def logout():
 def get_current_user():
     try:
         user_id = int(get_jwt_identity())
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
 
         if not user:
             return jsonify({'error': 'User not found'}), 404
@@ -140,7 +140,7 @@ def get_current_user():
 def get_prediction_history():
     try:
         user_id = int(get_jwt_identity())
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
 
         if not user:
             return jsonify({'error': 'User not found'}), 404
