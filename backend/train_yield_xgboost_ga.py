@@ -228,7 +228,10 @@ print("\n" + "=" * 70)
 print("SAVING XGBOOST MODEL")
 print("=" * 70)
 
-# Save with joblib for consistency with Flask app
+# Save in native XGBoost format (avoids pickle version-incompatibility warnings)
+final_model.save_model('models/yield_model_xgboost.ubj')
+
+# Also keep a joblib .pkl for legacy compatibility
 import joblib
 joblib.dump(final_model, 'models/yield_model_xgboost.pkl')
 
@@ -250,7 +253,8 @@ with open('models/training_metrics_xgboost.json', 'w') as f:
     import json
     json.dump(metrics, f, indent=2)
 
-print(f"\nXGBoost Model saved: models/yield_model_xgboost.pkl")
+print(f"\nXGBoost Model saved (native):  models/yield_model_xgboost.ubj")
+print(f"XGBoost Model saved (legacy):  models/yield_model_xgboost.pkl")
 print(f"Hyperparameters saved: models/best_hyperparameters_xgboost.json")
 print(f"Metrics saved: models/training_metrics_xgboost.json")
 

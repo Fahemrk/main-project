@@ -31,9 +31,9 @@ export const getCultivationGuide = async (crop: string, inputData: SoilData): Pr
     const guide = await retryAsync(
       async () => {
         const ai = new GoogleGenAI({ apiKey });
-        
-        const locationInfo = inputData.latitude && inputData.longitude 
-          ? `\n- Coordinates: ${inputData.latitude}, ${inputData.longitude}` 
+
+        const locationInfo = inputData.latitude && inputData.longitude
+          ? `\n- Coordinates: ${inputData.latitude}, ${inputData.longitude}`
           : (inputData.location ? `\n- Location: ${inputData.location}` : '');
 
         const prompt = `
@@ -83,14 +83,14 @@ export const getCultivationGuide = async (crop: string, inputData: SoilData): Pr
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error("Gemini API Error:", errorMessage);
-    
+
     if (errorMessage.includes('API key')) {
       throw new Error('Invalid or missing Gemini API key');
     }
     if (errorMessage.includes('timeout') || errorMessage.includes('AbortError')) {
       throw new Error('Gemini API request timed out. Please try again.');
     }
-    
+
     throw new Error(`Failed to generate cultivation guide: ${errorMessage}`);
   }
 };

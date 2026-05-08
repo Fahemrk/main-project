@@ -7,6 +7,14 @@ import os
 import logging
 import json
 import sys
+from datetime import timedelta
+
+# ── Logging must be configured before anything that calls logger ──────────────
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 # Ensure backend acts as a proper package when run directly
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -52,6 +60,7 @@ if not jwt_secret:
     jwt_secret = 'dev-secret-key-change-in-production'
 
 app.config['JWT_SECRET_KEY'] = jwt_secret
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=7)
 
 db.init_app(app)
 jwt = JWTManager(app)
@@ -94,11 +103,7 @@ def expired_token_callback(jwt_header, jwt_data):
     logger.error(f"Expired JWT token")
     return jsonify({'error': 'Token has expired'}), 401
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# (Logger is now initialised at module top — see above)
 
 FEATURE_NAMES = ['Nitrogen (N)', 'Phosphorus (P)', 'Potassium (K)', 'Temperature', 'Humidity', 'pH Level', 'Rainfall']
 FEATURE_RANGES = {
@@ -460,15 +465,23 @@ def predict_yield():
             return jsonify({'error': f'Missing fields: {", ".join(missing)}'}), 400
         
         try:
-            # We enforce using the best performing model: XGBoost
-            yield_model_path = os.path.join(current_dir, 'models', 'yield_model_xgboost.pkl')
-            
-            if not os.path.exists(yield_model_path):
-                raise FileNotFoundError(f"Optimized XGBoost model not found at {yield_model_path}")
-                
-            yield_model = joblib.load(yield_model_path)
-            logger.info("XGBoost yield model loaded successfully")
-                
+            # Prefer native XGBoost format (.ubj); fall back to legacy .pkl
+            yield_model_path_ubj = os.path.join(current_dir, 'models', 'yield_model_xgboost.ubj')
+            yield_model_path_pkl = os.path.join(current_dir, 'models', 'yield_model_xgboost.pkl')
+
+            if os.path.exists(yield_model_path_ubj):
+                import xgboost as xgb
+                yield_model = xgb.XGBRegressor()
+                yield_model.load_model(yield_model_path_ubj)
+                logger.info("XGBoost yield model loaded from native format (.ubj)")
+            elif os.path.exists(yield_model_path_pkl):
+                yield_model = joblib.load(yield_model_path_pkl)
+                logger.info("XGBoost yield model loaded from legacy format (.pkl)")
+            else:
+                raise FileNotFoundError(
+                    f"Yield model not found at {yield_model_path_ubj} or {yield_model_path_pkl}"
+                )
+
             scaler = joblib.load(os.path.join(current_dir, 'models', 'scaler.pkl'))
             crop_encoder = joblib.load(os.path.join(current_dir, 'models', 'crop_encoder.pkl'))
             season_encoder = joblib.load(os.path.join(current_dir, 'models', 'season_encoder.pkl'))
@@ -476,15 +489,16 @@ def predict_yield():
             logger.info("Yield model encoders loaded successfully")
         except FileNotFoundError as e:
             logger.error(f"Model files not found: {str(e)}")
-            return jsonify({'error': f'Yield model not trained yet. Please run XGBoost training pipeline first.'}), 503
+            return jsonify({'error': 'Yield model not trained yet. Please run XGBoost training pipeline first.'}), 503
         except Exception as e:
             logger.error(f"Failed to load yield model: {str(e)}")
             return jsonify({'error': f'Failed to load yield model: {str(e)}'}), 500
         
         try:
-            crop_idx = crop_encoder.transform([data['crop'].strip()])[0]
-            season_idx = season_encoder.transform([data['season'].strip()])[0]
-            state_idx = state_encoder.transform([data['state'].strip()])[0]
+            # Normalise to Title Case to match encoder training labels (e.g. 'rice' -> 'Rice')
+            crop_idx = crop_encoder.transform([data['crop'].strip().title()])[0]
+            season_idx = season_encoder.transform([data['season'].strip().title()])[0]
+            state_idx = state_encoder.transform([data['state'].strip().title()])[0]
         except ValueError as e:
             logger.warning(f"Invalid categorical value: {str(e)}")
             return jsonify({'error': f'Invalid crop, season, or state value: {str(e)}'}), 400
@@ -532,14 +546,16 @@ def predict_yield():
                 ]
                 importance_list.sort(key=lambda x: x['importance'], reverse=True)
         
-        confidence = 0.85
-        if hasattr(yield_model, 'score'):
-            try:
-                logger.info("Attempting to calculate model confidence...")
-                confidence = min(0.95, 0.75 + (predicted_yield / 100.0) * 0.2)
-            except:
-                pass
-        
+        # Use actual test R² from saved training metrics as the reported confidence
+        confidence = 0.86  # default fallback
+        try:
+            metrics_path = os.path.join(current_dir, 'models', 'training_metrics_xgboost.json')
+            with open(metrics_path, 'r') as mf:
+                metrics = json.load(mf)
+            confidence = float(metrics.get('test_r2_score', confidence))
+        except Exception as me:
+            logger.warning(f"Could not read yield model metrics: {me}")
+
         response = {
             'predicted_yield': predicted_yield,
             'confidence': confidence,
@@ -554,8 +570,36 @@ def predict_yield():
             'feature_importance': importance_list,
             'top_features': importance_list[:5]
         }
-        
-        logger.info(f"Yield prediction successful: {predicted_yield:.2f} (confidence: {confidence:.2%})")
+
+        # Save yield prediction to history
+        try:
+            import json as _json
+            prediction_record = PredictionHistory(
+                user_id=user_id,
+                prediction_type='yield',
+                crop=data['crop'].strip().title(),
+                confidence=confidence,
+                # Soil fields are not applicable for yield — store 0 as placeholder
+                N=0.0, P=0.0, K=0.0,
+                temperature=0.0, humidity=0.0, ph=0.0,
+                rainfall=rainfall,
+                result_json=_json.dumps({
+                    'predicted_yield': predicted_yield,
+                    'season': data['season'],
+                    'state': data['state'],
+                    'area': area,
+                    'fertilizer': fertilizer,
+                    'pesticide': pesticide,
+                    'year': year,
+                })
+            )
+            db.session.add(prediction_record)
+            db.session.commit()
+        except Exception as he:
+            logger.warning(f"Could not save yield prediction to history: {he}")
+            db.session.rollback()
+
+        logger.info(f"Yield prediction successful: {predicted_yield:.2f} (model R²: {confidence:.4f})")
         return jsonify(response), 200
     
     except Exception as e:

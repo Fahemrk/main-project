@@ -9,20 +9,54 @@ import os
 
 # --- Configuration ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = os.path.join(BASE_DIR, "data", "price_data.csv")
+DATA_DIR = os.path.join(BASE_DIR, "data")
 MODEL_DIR = os.path.join(BASE_DIR, "models")
-# UPDATED: v4 (60-day) model artifacts
-MODEL_PATH = os.path.join(MODEL_DIR, "crop_price_model_v4.pkl")
-FEATURE_PATH = os.path.join(MODEL_DIR, "feature_columns_v4.pkl")
-METRICS_PATH = os.path.join(MODEL_DIR, "training_metrics_price_v4.json")
-
-# Ensure models directory exists
 os.makedirs(MODEL_DIR, exist_ok=True)
+
+CROPS_CONFIG = {
+    "rice": {
+        "file": "price_data.csv",
+        "exogenous": ["rainfall_mm", "avg_temp_c", "MSP", "diesel_price", "export_ban"]
+    },
+    "watermelon": {
+        "file": "watermelon_dataset.xlsx",
+        "exogenous": ["rainfall_mm", "avg_temp_c", "MSP", "diesel_price", "export_ban"]
+    },
+    "coconut": {
+        "file": "kerala_coconut_dataset.xlsx",
+        "exogenous": [
+            "rainfall_mm", "avg_temp_c", "avg_humidity_pct", 
+            "copra_price", "coconut_oil_price", 
+            "yield_index", "pest_disease_index", 
+            "MSP", "diesel_price", "export_ban", "flood_event"
+        ]
+    }
+}
 
 def load_and_preprocess_data(filepath):
     print(f"Loading data from {filepath}...")
-    df = pd.read_csv(filepath)
+    if filepath.endswith('.csv'):
+        df = pd.read_csv(filepath)
+    else:
+        df = pd.read_excel(filepath)
+        
     df["date"] = pd.to_datetime(df["date"])
+    
+    # Ensure modal_price is strictly numeric
+    if "modal_price" in df.columns:
+        df["modal_price"] = pd.to_numeric(df["modal_price"], errors='coerce')
+
+    # Ensure other specific numeric columns for coconut and watermelon are numeric
+    exogenous_candidates = [
+        "rainfall_mm", "avg_temp_c", "avg_humidity_pct", 
+        "copra_price", "coconut_oil_price", 
+        "yield_index", "pest_disease_index", 
+        "MSP", "diesel_price", "export_ban", "flood_event"
+    ]
+    for col in exogenous_candidates:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+            
     df = df.sort_values("date").reset_index(drop=True)
     
     # Fill missing values:
@@ -59,31 +93,23 @@ def load_and_preprocess_data(filepath):
     
     return df
 
-def train_model():
-    df = load_and_preprocess_data(DATA_PATH)
+def train_model_for_crop(crop_name, config):
+    print(f"\n{'='*50}")
+    print(f"  Training Model for Crop: {crop_name.upper()}")
+    print(f"{'='*50}")
+
+    data_path = os.path.join(DATA_DIR, config["file"])
+    df = load_and_preprocess_data(data_path)
     target = "modal_price"
     
-    # Define features to use (Extended Set with 60-day features)
+    # Define features to use
     features = [
-        # Autoregressive
         "price_lag_1", "price_lag_7", "price_lag_30", "price_lag_60",
-        
-        # Trend & Volatility
         "price_roll_mean_7", "price_roll_mean_30", "price_roll_mean_60",
         "price_roll_std_7", "price_roll_std_30", "price_roll_std_60",
-        
-        # Momentum
         "price_roc_7", "price_roc_30", "price_roc_60",
-        
-        # Time
-        "month", "day_of_year",
-        
-        # Exogenous - Weather
-        "rainfall_mm", "avg_temp_c",
-        
-        # Exogenous - Economic/Policy
-        "MSP", "diesel_price", "export_ban"
-    ]
+        "month", "day_of_year"
+    ] + config["exogenous"]
     
     # Verify features
     existing_features = [f for f in features if f in df.columns]
@@ -99,9 +125,7 @@ def train_model():
     
     print(f"Train size: {len(X_train)}, Test size: {len(X_test)}")
     
-    # --- Hyperparameter Tuning ---
     print("Starting Hyperparameter Tuning (RandomizedSearchCV)...")
-    
     xgb_reg = xgb.XGBRegressor(objective='reg:squarederror', random_state=42, n_jobs=-1)
     
     param_dist = {
@@ -114,9 +138,7 @@ def train_model():
         'gamma': [0, 0.1, 0.2]
     }
     
-    # TimeSeriesSplit for CV to prevent data leakage (training on future)
     tscv = TimeSeriesSplit(n_splits=3)
-    
     random_search = RandomizedSearchCV(
         estimator=xgb_reg,
         param_distributions=param_dist,
@@ -139,17 +161,20 @@ def train_model():
     mae = mean_absolute_error(y_test, predictions)
     r2 = r2_score(y_test, predictions)
     
-    print(f"\n--- Model Evaluation (v4 with 60-day features) ---")
+    print(f"\n--- Model Evaluation for {crop_name} ---")
     print(f"RMSE: {rmse:.2f}")
     print(f"MAE:  {mae:.2f}")
     print(f"R²:   {r2:.4f}")
     
-    # Save artifacts
-    print(f"\nSaving model to {MODEL_PATH}...")
-    joblib.dump(best_model, MODEL_PATH)
-    joblib.dump(existing_features, FEATURE_PATH)
+    # Save artifacts specific to crop
+    model_path = os.path.join(MODEL_DIR, f"crop_price_model_v4_{crop_name}.pkl")
+    feature_path = os.path.join(MODEL_DIR, f"feature_columns_v4_{crop_name}.pkl")
+    metrics_path = os.path.join(MODEL_DIR, f"training_metrics_price_v4_{crop_name}.json")
     
-    # Save metrics
+    print(f"\nSaving {crop_name} model to {model_path}...")
+    joblib.dump(best_model, model_path)
+    joblib.dump(existing_features, feature_path)
+    
     metrics = {
         "test_rmse": rmse,
         "test_mae": mae,
@@ -157,10 +182,11 @@ def train_model():
         "features": existing_features,
         "best_params": random_search.best_params_
     }
-    with open(METRICS_PATH, "w") as f:
+    with open(metrics_path, "w") as f:
         json.dump(metrics, f, indent=4)
         
-    print("✓ Tuning & Training complete.")
+    print(f"✓ Tuning & Training complete for {crop_name}.")
 
 if __name__ == "__main__":
-    train_model()
+    for crop_name, config in CROPS_CONFIG.items():
+        train_model_for_crop(crop_name, config)

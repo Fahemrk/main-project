@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timezone
 import bcrypt
+import json
 
 db = SQLAlchemy()
 
@@ -12,8 +13,8 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     predictions = db.relationship('PredictionHistory', backref='user', lazy=True, cascade='all, delete-orphan')
 
@@ -48,11 +49,16 @@ class PredictionHistory(db.Model):
     rainfall = db.Column(db.Float, nullable=False)
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    # 'crop', 'yield', or 'price' — allows history to store all prediction types
+    prediction_type = db.Column(db.String(20), nullable=False, default='crop')
+    # JSON string for flexible result storage (yield/price predictions)
+    result_json = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), index=True)
 
     def to_dict(self):
-        return {
+        base = {
             'id': self.id,
+            'prediction_type': self.prediction_type,
             'crop': self.crop,
             'confidence': self.confidence,
             'N': self.N,
@@ -66,3 +72,9 @@ class PredictionHistory(db.Model):
             'longitude': self.longitude,
             'created_at': self.created_at.isoformat(),
         }
+        if self.result_json:
+            try:
+                base['result_data'] = json.loads(self.result_json)
+            except Exception:
+                base['result_data'] = None
+        return base
